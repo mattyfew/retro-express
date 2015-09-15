@@ -1,12 +1,13 @@
 var express = require('express');
 var app = express();
-var body-parser = require('body-parser')
+var bodyParser = require('body-parser')
 var urlencodedBodyParser = bodyParser.urlencoded({extended:false});
 //need to inlude DB
 var methodOverride = require('method-override');
 
 app.use(urlencodedBodyParser);
 app.use(methodOverride('_method'));
+app.use(express.static('public'));
 
 app.get('/retro-express', function(req,res){
 	res.render('index.html')
