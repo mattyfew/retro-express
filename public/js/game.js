@@ -7,11 +7,13 @@ var display = document.getElementById('game-display');
 var displayStyle = window.getComputedStyle(display);
 var displayWidth = displayStyle.width;
 var displayHeight = displayStyle.height;
-console.log(window.getComputedStyle(display))
-console.log(displayWidth);
-console.log(displayHeight);
+//console.log(window.getComputedStyle(display))
+console.log("display width: "+displayWidth);
+console.log("display height: "+displayHeight);
 
 renderer.setSize( displayWidth, displayHeight);
+var rendererThing = JSON.stringify(renderer, null, 4);
+console.log("renderer: " + rendererThing)
 display.appendChild( renderer.domElement );
 
 var geometry = new THREE.BoxGeometry( 1, 1, 1 );
