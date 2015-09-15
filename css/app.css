@@ -2,35 +2,33 @@ body {
 	background-color: #333333;
 	background-image: url('../img/cubes.png');
 	color: #00FF00;
+	font-size: 16px;
 }
 pre {
 	font-family: "Courier New", Courier, monospace;
-	font-size: 16px;
 }
 header pre {
 	text-align: center;
+	font-size: .4em;
+	text-overflow: ellipsis;
+	overflow: hidden;
 }
-header span{
+header span {
 	display: none;
 }
-
-#game-wrapper{
-	
-}
-#game-display{
+#game-wrapper {}
+#game-display {
 	min-width: 320px;
 	max-width: 1200px;
 	margin: auto;
 	border: 1px solid #00FF00;
 	background-color: #222222;
 	text-align: center;
-	
 }
-#game-info{
+#game-info {
 	max-width: 1200px;
 	margin: auto;
 	border: 1px solid #00FF00;
 	background-color: #353535;
 	text-align: center;
-	
 }
