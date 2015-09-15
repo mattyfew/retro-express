@@ -1,0 +1,14 @@
+{
+  "name": "threex.pacman",
+  "homepage": "https://github.com/jeromeetienne/threex.pacman",
+  "_release": "ba2710439f",
+  "_resolution": {
+    "type": "branch",
+    "branch": "master",
+    "commit": "ba2710439fc58ca3092e71e74b199b79103c5a21"
+  },
+  "_source": "git://github.com/jeromeetienne/threex.pacman.git",
+  "_target": "*",
+  "_originalSource": "threex.pacman",
+  "_direct": true
+}
