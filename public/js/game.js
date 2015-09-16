@@ -39,7 +39,7 @@ function onWindowResize() {
 scene.add(new THREE.AmbientLight(0xCCCCCC));
 
 ////CAMERA
-var camera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 5000);
+var camera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 1000);
 camera.position.set(0, 0, 300);
 camera.lookAt( scene.position );
 //camera.lookAt( rexMesh );
@@ -68,6 +68,8 @@ scene.add( cubeMesh );
 cubeMesh.material.side = THREE.DoubleSide;
 
 ////REX (SPACESHIP) - CENTERED ON AXIS
+var rexPivot = new THREE.Object3D();
+scene.add( rexPivot )
 var rexShape = new THREE.Shape();
 rexShapeData()//GRABS SVG DATA
 var rexExtrusion = {amount: 4,bevelEnabled: false};
@@ -75,10 +77,8 @@ var rexGeometry = new THREE.ExtrudeGeometry(rexShape, rexExtrusion);
 var rexMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00,wireframe: true});
 var rexMesh = new THREE.Mesh(rexGeometry, rexMaterial);
 var rexDirection = "up";
-//rexMesh.rotateX(1.5707963268);
-//rexMesh.rotation.x = 1.5707963268;
-//rexMesh.translateZ(50);
-//rexMesh.position.set = THREE.Geometry.center
+rexMesh.rotateX(1.5707963268);
+rexPivot.translateZ(100);
 
 //var quaternion = new THREE.Quaternion();
 //quaternion.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), Math.PI / 2 );
@@ -88,7 +88,7 @@ var rexDirection = "up";
 //q.setFromAxisAngle( axis, angle ); // axis must be normalized, angle in radians
 //object.quaternion.multiplyQuaternions( q, object.quaternion );
 
-scene.add(rexMesh);
+rexPivot.add(rexMesh);
 
 ////RENDER
 var render = function () {
@@ -119,13 +119,13 @@ render();
 ////REX WOBBLE
 function rexWobble(){
 	if(rexDirection === "up"){
-		rexMesh.translateY(.05)
-		if (rexMesh.position.y > 1){
+		rexPivot.translateY(.05)
+		if (rexPivot.position.y > 1){
 			rexDirection = "down"
 		}
 	} else if (rexDirection === "down"){
-		rexMesh.translateY(-.05)
-		if (rexMesh.position.y < -1){
+		rexPivot.translateY(-.05)
+		if (rexPivot.position.y < -1){
 			rexDirection = "up"
 		}	
 	}
@@ -158,15 +158,15 @@ function rexShapeData(){
 //// SHIP CONTROLS - TRANSLATES REX ON KEYPRESS
 function shipControls() {
 	//AWDS KEY CONTROLS
-	if (Key.isDown(Key.A)) {rexMesh.translateX(-3)}
-	if (Key.isDown(Key.D)) {rexMesh.translateX(3)}
-	if (Key.isDown(Key.W)) {rexMesh.translateY(3)}
-	if (Key.isDown(Key.S)) {rexMesh.translateY(-3)}
+	if (Key.isDown(Key.A)) {rexPivot.translateX(-3)}
+	if (Key.isDown(Key.D)) {rexPivot.translateX(3)}
+	if (Key.isDown(Key.W)) {rexPivot.translateY(3)}
+	if (Key.isDown(Key.S)) {rexPivot.translateY(-3)}
 	//ARROW KEY CONTROLS
-	if (Key.isDown(Key.left)) {rexMesh.translateX(-3)}
-	if (Key.isDown(Key.right)) {rexMesh.translateX(3)}
-	if (Key.isDown(Key.up)) {rexMesh.translateY(3)}
-	if (Key.isDown(Key.down)) {rexMesh.translateY(-3)}
+	if (Key.isDown(Key.left)) {rexPivot.translateX(-3),rexMesh.rotateY(-.003)}
+	if (Key.isDown(Key.right)) {rexPivot.translateX(3),rexMesh.rotateY(.003)}
+	if (Key.isDown(Key.up)) {rexPivot.translateY(3)}
+	if (Key.isDown(Key.down)) {rexPivot.translateY(-3)}
 }
 
 
