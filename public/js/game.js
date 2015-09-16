@@ -3,6 +3,19 @@ console.log("GAME.JS")
 ////CREATE SCENE
 var scene = new THREE.Scene();
 
+////DEFINE KEYPRESS EVENT LISTENERS
+////REX X & Y MOTION
+window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
+window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
+var Key = {
+	_pressed: {},
+	left: 37,up: 38,right: 39,down: 40,
+	A: 65,W: 87,D: 68,S: 83,
+	isDown: function(keyCode) {return this._pressed[keyCode];},
+	onKeydown: function(event) {this._pressed[event.keyCode] = true;},
+	onKeyup: function(event) {delete this._pressed[event.keyCode];}
+};
+
 ////DOM SETUP
 var renderer = new THREE.WebGLRenderer();
 var display = document.getElementById('game-display');
@@ -19,7 +32,6 @@ function onWindowResize() {
 	var displayHeight = parseInt(displayStyle.width) / 2;
 	camera.aspect = displayWidth / displayHeight;
 	camera.updateProjectionMatrix();
-
 	renderer.setSize(displayWidth, displayHeight);
 }
 
@@ -30,6 +42,7 @@ scene.add(new THREE.AmbientLight(0xCCCCCC));
 var camera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 5000);
 camera.position.set(0, 0, 300);
 camera.lookAt( scene.position );
+//camera.lookAt( rexMesh );
 
 ////GEOMETRY
 ////GRID PLANE
@@ -47,7 +60,6 @@ var gridLine = new THREE.Line( gridGeometry, gridMaterial, THREE.LinePieces);
 gridLine.position.y = -200;
 scene.add(gridLine);
 
-
 ////CUBE
 var cubeGeometry = new THREE.BoxGeometry( 50, 50, 5000 );
 var cubeMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true} );
@@ -63,32 +75,42 @@ var rexGeometry = new THREE.ExtrudeGeometry(rexShape, rexExtrusion);
 var rexMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00,wireframe: true});
 var rexMesh = new THREE.Mesh(rexGeometry, rexMaterial);
 var rexDirection = "up";
-//rexMesh.rotation.x = .01;
-rexMesh.rotateX(1.5707963268);
+//rexMesh.rotateX(1.5707963268);
+//rexMesh.rotation.x = 1.5707963268;
+//rexMesh.translateZ(50);
 //rexMesh.position.set = THREE.Geometry.center
-scene.add(rexMesh);
-//camera.lookAt( rexMesh );
 
+//var quaternion = new THREE.Quaternion();
+//quaternion.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), Math.PI / 2 );
+//rexMesh.quaternion.multiplyQuaternions( quaternion, rexMesh.quaternion );
+
+//var q = new THREE.Quaternion();
+//q.setFromAxisAngle( axis, angle ); // axis must be normalized, angle in radians
+//object.quaternion.multiplyQuaternions( q, object.quaternion );
+
+scene.add(rexMesh);
 
 ////RENDER
 var render = function () {
 	requestAnimationFrame(render);
-
 	
 	gridLine.translateZ(-1.5);
-	
-//	cubeMesh.rotation.x += 0.01;
-//	cubeMesh.rotation.y += 0.01;
-//	cubeMesh.rotation.z += 0.01;
-	cubeMesh.translateZ(2);
-	
 
-//	rexMesh.translateZ(-1);
-	
+	//	cubeMesh.rotation.x += 0.01;
+	//	cubeMesh.rotation.y += 0.01;
+	//	cubeMesh.rotation.z += 0.01;
+	cubeMesh.translateZ(2);
+
+	//rexMesh.translateZ(-1);
+
 	//camera.translateZ(-2);
 	
-//	rexWobble();
-
+	rexWobble();
+	shipControls();
+	
+	//	var xAxis = new THREE.Vector3(1,0,0);
+	//	rotateAroundWorldAxis(rexMesh, xAxis, Math.PI / 180);
+	
 	renderer.render(scene, camera);
 };
 
@@ -97,17 +119,18 @@ render();
 ////REX WOBBLE
 function rexWobble(){
 	if(rexDirection === "up"){
-		rexMesh.translateZ(-.05)
-		if (rexMesh.position.z > 1){
+		rexMesh.translateY(.05)
+		if (rexMesh.position.y > 1){
 			rexDirection = "down"
 		}
 	} else if (rexDirection === "down"){
-		rexMesh.translateZ(.05)
-		if (rexMesh.position.z < -1){
+		rexMesh.translateY(-.05)
+		if (rexMesh.position.y < -1){
 			rexDirection = "up"
 		}	
 	}
 }
+
 ////REX SVG COORDINATES - CENTERED
 function rexShapeData(){
 	rexShape.moveTo(0, -35);
@@ -131,3 +154,58 @@ function rexShapeData(){
 //rexShape.lineTo(56.6, 56.8);
 //rexShape.lineTo(78.2, 56.8);
 
+
+//// SHIP CONTROLS - TRANSLATES REX ON KEYPRESS
+function shipControls() {
+	//AWDS KEY CONTROLS
+	if (Key.isDown(Key.A)) {rexMesh.translateX(-3)}
+	if (Key.isDown(Key.D)) {rexMesh.translateX(3)}
+	if (Key.isDown(Key.W)) {rexMesh.translateY(3)}
+	if (Key.isDown(Key.S)) {rexMesh.translateY(-3)}
+	//ARROW KEY CONTROLS
+	if (Key.isDown(Key.left)) {rexMesh.translateX(-3)}
+	if (Key.isDown(Key.right)) {rexMesh.translateX(3)}
+	if (Key.isDown(Key.up)) {rexMesh.translateY(3)}
+	if (Key.isDown(Key.down)) {rexMesh.translateY(-3)}
+}
+
+
+// Rotate an object around an arbitrary axis in object space
+var rotObjectMatrix;
+function rotateAroundObjectAxis(object, axis, radians) {
+	rotObjectMatrix = new THREE.Matrix4();
+	rotObjectMatrix.makeRotationAxis(axis.normalize(), radians);
+
+	// old code for Three.JS pre r54:
+	// object.matrix.multiplySelf(rotObjectMatrix);      // post-multiply
+	// new code for Three.JS r55+:
+	object.matrix.multiply(rotObjectMatrix);
+
+	// old code for Three.js pre r49:
+	// object.rotation.getRotationFromMatrix(object.matrix, object.scale);
+	// old code for Three.js r50-r58:
+	// object.rotation.setEulerFromRotationMatrix(object.matrix);
+	// new code for Three.js r59+:
+	object.rotation.setFromRotationMatrix(object.matrix);
+}
+
+var rotWorldMatrix;
+// Rotate an object around an arbitrary axis in world space       
+function rotateAroundWorldAxis(object, axis, radians) {
+	rotWorldMatrix = new THREE.Matrix4();
+	rotWorldMatrix.makeRotationAxis(axis.normalize(), radians);
+
+	// old code for Three.JS pre r54:
+	//  rotWorldMatrix.multiply(object.matrix);
+	// new code for Three.JS r55+:
+	rotWorldMatrix.multiply(object.matrix);                // pre-multiply
+
+	object.matrix = rotWorldMatrix;
+
+	// old code for Three.js pre r49:
+	// object.rotation.getRotationFromMatrix(object.matrix, object.scale);
+	// old code for Three.js pre r59:
+	// object.rotation.setEulerFromRotationMatrix(object.matrix);
+	// code for r59+:
+	object.rotation.setFromRotationMatrix(object.matrix);
+}
