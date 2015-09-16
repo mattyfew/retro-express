@@ -39,7 +39,7 @@ function onWindowResize() {
 scene.add(new THREE.AmbientLight(0xCCCCCC));
 
 ////CAMERA
-var camera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 1000);
+var camera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 2500);
 camera.position.set(0, 0, 300);
 camera.lookAt( scene.position );
 //camera.lookAt( rexMesh );
@@ -49,7 +49,7 @@ camera.lookAt( scene.position );
 var gridSize = 300000;
 var gridStep = 30;
 var gridGeometry = new THREE.Geometry();
-var gridMaterial = new THREE.LineBasicMaterial({color: 'green'});
+var gridMaterial = new THREE.LineBasicMaterial({color: 0x0000FF});
 for (var i = - gridSize; i <= gridSize; i += gridStep){
 	gridGeometry.vertices.push(new THREE.Vector3( - gridSize, - 0.04, i ));
 	gridGeometry.vertices.push(new THREE.Vector3( gridSize, - 0.04, i ));
@@ -74,32 +74,24 @@ var rexShape = new THREE.Shape();
 rexShapeData()//GRABS SVG DATA
 var rexExtrusion = {amount: 4,bevelEnabled: false};
 var rexGeometry = new THREE.ExtrudeGeometry(rexShape, rexExtrusion);
-var rexMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00,wireframe: true});
+var rexMaterial = new THREE.MeshBasicMaterial({color: 0x00FF00, wireframe:true});
 var rexMesh = new THREE.Mesh(rexGeometry, rexMaterial);
 var rexDirection = "up";
 rexMesh.rotateX(1.5707963268);
 rexPivot.translateZ(100);
-
-//var quaternion = new THREE.Quaternion();
-//quaternion.setFromAxisAngle( new THREE.Vector3( 1, 0, 0 ), Math.PI / 2 );
-//rexMesh.quaternion.multiplyQuaternions( quaternion, rexMesh.quaternion );
-
-//var q = new THREE.Quaternion();
-//q.setFromAxisAngle( axis, angle ); // axis must be normalized, angle in radians
-//object.quaternion.multiplyQuaternions( q, object.quaternion );
-
 rexPivot.add(rexMesh);
 
 ////RENDER
 var render = function () {
 	requestAnimationFrame(render);
 	
+
 	gridLine.translateZ(-1.5);
 
 	//	cubeMesh.rotation.x += 0.01;
 	//	cubeMesh.rotation.y += 0.01;
 	//	cubeMesh.rotation.z += 0.01;
-	cubeMesh.translateZ(2);
+	cubeMesh.translateZ(1);
 
 	//rexMesh.translateZ(-1);
 
@@ -163,10 +155,10 @@ function shipControls() {
 	if (Key.isDown(Key.W)) {rexPivot.translateY(3)}
 	if (Key.isDown(Key.S)) {rexPivot.translateY(-3)}
 	//ARROW KEY CONTROLS
-	if (Key.isDown(Key.left)) {rexPivot.translateX(-3),rexMesh.rotateY(-.003)}
-	if (Key.isDown(Key.right)) {rexPivot.translateX(3),rexMesh.rotateY(.003)}
-	if (Key.isDown(Key.up)) {rexPivot.translateY(3)}
-	if (Key.isDown(Key.down)) {rexPivot.translateY(-3)}
+	if (Key.isDown(Key.left)) {if(rexPivot.position.x > -100){rexPivot.translateX(-3),rexMesh.rotateY(-.003),scene.rotateZ(-.001)}}
+	if (Key.isDown(Key.right)) {if(rexPivot.position.x < 100){rexPivot.translateX(3),rexMesh.rotateY(.003), scene.rotateZ(.001)}}
+	if (Key.isDown(Key.up)) {if(rexPivot.position.y < 65){rexPivot.translateY(3)}}
+	if (Key.isDown(Key.down)) {if(rexPivot.position.y > -65){rexPivot.translateY(-3)}}
 }
 
 
