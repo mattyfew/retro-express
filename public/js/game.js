@@ -1,8 +1,7 @@
-console.log("APP.JS")
+console.log("GAME.JS")
+
+////CREATE SCENE
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
-camera.position.set(0, 0, 300);
-camera.lookAt( scene.position );
 
 ////DOM SETUP
 var renderer = new THREE.WebGLRenderer();
@@ -16,16 +15,21 @@ display.appendChild(renderer.domElement);
 ////WINDOW RESIZE LISTENER
 window.addEventListener('resize', onWindowResize, false);
 function onWindowResize() {
-	camera.aspect = window.innerWidth / window.innerHeight;
-	camera.updateProjectionMatrix();
 	var displayWidth = parseInt(displayStyle.width);
 	var displayHeight = parseInt(displayStyle.width) / 2;
+	camera.aspect = displayWidth / displayHeight;
+	camera.updateProjectionMatrix();
+
 	renderer.setSize(displayWidth, displayHeight);
 }
 
 ////LIGHTS
 scene.add(new THREE.AmbientLight(0xCCCCCC));
 
+////CAMERA
+var camera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 5000);
+camera.position.set(0, 0, 300);
+camera.lookAt( scene.position );
 
 ////GEOMETRY
 ////GRID PLANE
@@ -60,7 +64,7 @@ var rexMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00,wireframe: true})
 var rexMesh = new THREE.Mesh(rexGeometry, rexMaterial);
 var rexDirection = "up";
 //rexMesh.rotation.x = .01;
-//rexMesh.rotateX(90);
+rexMesh.rotateX(1.5707963268);
 //rexMesh.position.set = THREE.Geometry.center
 scene.add(rexMesh);
 //camera.lookAt( rexMesh );
@@ -79,7 +83,7 @@ var render = function () {
 	cubeMesh.translateZ(2);
 	
 
-	rexMesh.translateZ(-1);
+//	rexMesh.translateZ(-1);
 	
 	//camera.translateZ(-2);
 	
