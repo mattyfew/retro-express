@@ -1,7 +1,8 @@
 console.log("APP.JS")
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera(25, window.innerWidth / window.innerHeight, 0.1, 0);
-camera.position.set(0, 50, 400);
+var camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 5000);
+camera.position.set(0, 0, 300);
+camera.lookAt( scene.position );
 
 ////DOM SETUP
 var renderer = new THREE.WebGLRenderer();
@@ -39,14 +40,16 @@ for (var i = - gridSize; i <= gridSize; i += gridStep){
 	gridGeometry.vertices.push(new THREE.Vector3( i, - 0.04, gridSize ));
 }
 var gridLine = new THREE.Line( gridGeometry, gridMaterial, THREE.LinePieces);
+gridLine.position.y = -200;
 scene.add(gridLine);
 
 
 ////CUBE
-var cubeGeometry = new THREE.BoxGeometry( 50, 50, 50 );
-var cubeMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe:true } );
+var cubeGeometry = new THREE.BoxGeometry( 50, 50, 5000 );
+var cubeMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true} );
 var cubeMesh = new THREE.Mesh( cubeGeometry, cubeMaterial );
 scene.add( cubeMesh );
+cubeMesh.material.side = THREE.DoubleSide;
 
 ////REX (SPACESHIP) - CENTERED ON AXIS
 var rexShape = new THREE.Shape();
@@ -55,25 +58,32 @@ var rexExtrusion = {amount: 4,bevelEnabled: false};
 var rexGeometry = new THREE.ExtrudeGeometry(rexShape, rexExtrusion);
 var rexMaterial = new THREE.MeshBasicMaterial({color: 0x00ff00,wireframe: true});
 var rexMesh = new THREE.Mesh(rexGeometry, rexMaterial);
-var rexDirection = "up"
-rexMesh.rotation.x = 90;
+var rexDirection = "up";
+//rexMesh.rotation.x = .01;
+//rexMesh.rotateX(90);
 //rexMesh.position.set = THREE.Geometry.center
 scene.add(rexMesh);
+//camera.lookAt( rexMesh );
 
 
 ////RENDER
 var render = function () {
 	requestAnimationFrame(render);
 
-	cubeMesh.rotation.x += 0.01;
-	cubeMesh.rotation.y += 0.01;
-	cubeMesh.rotation.z += 0.01;
-	cubeMesh.translateY(.5);
 	
-	rexMesh.rotation.x += 0.01;
-	rexMesh.rotation.z += 0.01;
+	gridLine.translateZ(-1.5);
 	
-	rexWobble();
+//	cubeMesh.rotation.x += 0.01;
+//	cubeMesh.rotation.y += 0.01;
+//	cubeMesh.rotation.z += 0.01;
+	cubeMesh.translateZ(2);
+	
+
+		rexMesh.translateZ(-2);
+	
+	camera.translateZ(-2);
+	
+//	rexWobble();
 
 	renderer.render(scene, camera);
 };
