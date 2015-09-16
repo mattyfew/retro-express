@@ -26,7 +26,6 @@ function onWindowResize() {
 ////LIGHTS
 scene.add(new THREE.AmbientLight(0xCCCCCC));
 
-
 ////GEOMETRY
 ////GRID PLANE
 var gridSize = 300000;
@@ -65,12 +64,15 @@ var rexDirection = "up";
 scene.add(rexMesh);
 //camera.lookAt( rexMesh );
 
+//KEYBOARD STATE
+var keyboard = new THREEx.KeyboardState();
+keyboard.pressed("a")
+
 
 ////RENDER
 var render = function () {
 	requestAnimationFrame(render);
 
-	
 	gridLine.translateZ(-1.5);
 	
 //	cubeMesh.rotation.x += 0.01;
@@ -78,8 +80,7 @@ var render = function () {
 //	cubeMesh.rotation.z += 0.01;
 	cubeMesh.translateZ(2);
 	
-
-		rexMesh.translateZ(-2);
+	rexMesh.translateZ(-2);
 	
 	camera.translateZ(-2);
 	
