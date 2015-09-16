@@ -79,9 +79,9 @@ var render = function () {
 	cubeMesh.translateZ(2);
 	
 
-		rexMesh.translateZ(-2);
+	rexMesh.translateZ(-1);
 	
-	camera.translateZ(-2);
+	//camera.translateZ(-2);
 	
 //	rexWobble();
 
