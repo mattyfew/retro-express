@@ -81,7 +81,7 @@ var rexShape = new THREE.Shape();
 rexShapeData()//GRABS SVG DATA
 var rexExtrusion = {amount: 4,bevelEnabled: false};
 var rexGeometry = new THREE.ExtrudeGeometry(rexShape, rexExtrusion);
-var rexMaterial = new THREE.MeshBasicMaterial({color: 0x00FF00, wireframe:true});
+var rexMaterial = new THREE.MeshBasicMaterial({color: 0x00FF00, wireframe: true});
 var rexMesh = new THREE.Mesh(rexGeometry, rexMaterial);
 var rexDirection = "up";
 rexMesh.rotateX(1.5707963268);
@@ -100,11 +100,19 @@ var render = function () {
 	requestAnimationFrame(render);
 	var delta = clock.getDelta()
 	var time = clock.getElapsedTime()*10;
-
+	var newColor = Math.floor(Math.random()*16777215).toString(16);
+	console.log(newColor)
+	
 	gridLine.translateZ(1.5);
 
 	//cubeMesh.rotation.z += 0.01;
 	cubeMesh.translateZ(1.5);
+	
+	
+//	cubeMesh.material.color.setHex( "0x" + newColor );
+//	rexMesh.material.color.setHex( "0x" + newColor );
+	
+	
 	
 	rexWobble();
 	shipControls();
@@ -167,7 +175,8 @@ function shipControls() {
 ////ENEMY GENERATION
 
 function createEnemy() {
-	
+
+	var newColor = '#'+Math.floor(Math.random()*16777215).toString(16);
 	if (typeof enemyMesh != "undefined"){
 		console.log("detected enemy!")
 		var lastEnemyPosition = enemyMesh.position.z;
@@ -178,7 +187,7 @@ function createEnemy() {
 	}
 	
 	var enemyGeometry = new THREE.BoxGeometry(Math.floor(Math.random() * 50), Math.floor(Math.random() * 50), Math.floor(Math.random() * 50))
-	var enemyMaterial = new THREE.MeshBasicMaterial({color: 0x00FF00,wireframe: true});
+	var enemyMaterial = new THREE.MeshBasicMaterial({color: newColor,wireframe: true});
 	enemyMesh = new THREE.Mesh(enemyGeometry, enemyMaterial);
 
 	var switchNum = Math.floor(Math.random()*4);
