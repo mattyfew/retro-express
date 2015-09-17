@@ -3,6 +3,9 @@ console.log("GAME.JS")
 ////CREATE SCENE
 var scene = new THREE.Scene();
 
+////CREATE CLOCK
+var clock = new THREE.Clock();
+
 ////DEFINE KEYPRESS EVENT LISTENERS
 ////REX X & Y MOTION
 window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
@@ -42,12 +45,15 @@ scene.add(new THREE.AmbientLight(0xCCCCCC));
 var camera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 2500);
 camera.position.set(0, 0, 300);
 camera.lookAt( scene.position );
-//camera.lookAt( rexMesh );
+
+////FOG
+scene.fog = new THREE.FogExp2( 0x000000, 0.0005);
+renderer.setClearColor( scene.fog.color, 1 );
 
 ////GEOMETRY
 ////GRID PLANE
 var gridSize = 300000;
-var gridStep = 30;
+var gridStep = 100;
 var gridGeometry = new THREE.Geometry();
 var gridMaterial = new THREE.LineBasicMaterial({color: 0x0000FF});
 for (var i = - gridSize; i <= gridSize; i += gridStep){
@@ -57,14 +63,15 @@ for (var i = - gridSize; i <= gridSize; i += gridStep){
 	gridGeometry.vertices.push(new THREE.Vector3( i, - 0.04, gridSize ));
 }
 var gridLine = new THREE.Line( gridGeometry, gridMaterial, THREE.LinePieces);
-gridLine.position.y = -200;
+gridLine.position.y = -500;
 scene.add(gridLine);
 
 ////CUBE
-var cubeGeometry = new THREE.BoxGeometry( 50, 50, 5000 );
-var cubeMaterial = new THREE.MeshBasicMaterial( { color: 0xff0000, wireframe: true} );
+var cubeGeometry = new THREE.BoxGeometry( 2000, 1000, 300000,10,10,1000);
+var cubeMaterial = new THREE.MeshBasicMaterial( { color: 0x666666, wireframe: true} );
 var cubeMesh = new THREE.Mesh( cubeGeometry, cubeMaterial );
 scene.add( cubeMesh );
+cubeMesh.position.y = -250;
 cubeMesh.material.side = THREE.DoubleSide;
 
 ////REX (SPACESHIP) - CENTERED ON AXIS
@@ -81,27 +88,26 @@ rexMesh.rotateX(1.5707963268);
 rexPivot.translateZ(100);
 rexPivot.add(rexMesh);
 
+////SET OBSTACLES ON INTERVAL
+setInterval(createEnemy, 1000)
+
 ////RENDER
 var render = function () {
 	requestAnimationFrame(render);
-	
+	var delta = clock.getDelta()
+	var time = clock.getElapsedTime()*10;
 
-	gridLine.translateZ(-1.5);
+	gridLine.translateZ(1.5);
 
-	//	cubeMesh.rotation.x += 0.01;
-	//	cubeMesh.rotation.y += 0.01;
-	//	cubeMesh.rotation.z += 0.01;
-	cubeMesh.translateZ(1);
-
-	//rexMesh.translateZ(-1);
-
-	//camera.translateZ(-2);
+	//cubeMesh.rotation.z += 0.01;
+	cubeMesh.translateZ(1.5);
 	
 	rexWobble();
 	shipControls();
-	
-	//	var xAxis = new THREE.Vector3(1,0,0);
-	//	rotateAroundWorldAxis(rexMesh, xAxis, Math.PI / 180);
+
+	if (typeof enemyMesh!= "undefined"){
+		enemyMesh.translateZ(1.5)
+	}
 	
 	renderer.render(scene, camera);
 };
@@ -146,17 +152,52 @@ function rexShapeData(){
 //rexShape.lineTo(56.6, 56.8);
 //rexShape.lineTo(78.2, 56.8);
 
-
 //// SHIP CONTROLS - TRANSLATES REX ON KEYPRESS
 function shipControls() {
-	//AWDS KEY CONTROLS
-	if (Key.isDown(Key.A)) {rexPivot.translateX(-3)}
-	if (Key.isDown(Key.D)) {rexPivot.translateX(3)}
-	if (Key.isDown(Key.W)) {rexPivot.translateY(3)}
-	if (Key.isDown(Key.S)) {rexPivot.translateY(-3)}
-	//ARROW KEY CONTROLS
-	if (Key.isDown(Key.left)) {if(rexPivot.position.x > -100){rexPivot.translateX(-3),rexMesh.rotateY(-.003),scene.rotateZ(-.001)}}
-	if (Key.isDown(Key.right)) {if(rexPivot.position.x < 100){rexPivot.translateX(3),rexMesh.rotateY(.003), scene.rotateZ(.001)}}
-	if (Key.isDown(Key.up)) {if(rexPivot.position.y < 65){rexPivot.translateY(3)}}
-	if (Key.isDown(Key.down)) {if(rexPivot.position.y > -65){rexPivot.translateY(-3)}}
+	//ARROW KEY & WASD CONTROLS
+	if (Key.isDown(Key.left) || Key.isDown(Key.A)) {if(rexPivot.position.x > -100){rexPivot.translateX(-5),rexMesh.rotateY(.005),scene.rotateZ(.001)}}
+	if (Key.isDown(Key.right) || Key.isDown(Key.D)) {if(rexPivot.position.x < 100){rexPivot.translateX(5),rexMesh.rotateY(-.005), scene.rotateZ(-.001)}}
+	if (Key.isDown(Key.up) || Key.isDown(Key.W)) {if(rexPivot.position.y < 65){rexPivot.translateY(3.2),rexMesh.rotateX(-.003), scene.rotateX(-.001)}}
+	if (Key.isDown(Key.down) || Key.isDown(Key.S)) {if(rexPivot.position.y > -65){rexPivot.translateY(-3.2),rexMesh.rotateX(.003), scene.rotateX(.001)}}
+}
+
+////ENEMY GENERATION
+
+function createEnemy() {
+	var enemyGeometry = new THREE.BoxGeometry(25, 25, 25)
+	var enemyMaterial = new THREE.MeshBasicMaterial({color: 0x00FF00,wireframe: true});
+	enemyMesh = new THREE.Mesh(enemyGeometry, enemyMaterial);
+
+	var switchNum = Math.floor(Math.random()*4);
+	console.log(switchNum)
+	switch(switchNum){
+		case 1:
+			////TOP RIGHT
+			console.log("QUAD1")
+			enemyMesh.position.set((Math.floor(Math.random() * 100)), (Math.floor(Math.random() * 75)), 100)
+			console.log(enemyMesh.position)
+			break;
+		case 2:
+			////TOP LEFT
+			console.log("QUAD2")
+			enemyMesh.position.set((Math.floor(Math.random() * -100)), (Math.floor(Math.random() * 75)), 100)
+			console.log(enemyMesh.position)
+			break;
+		case 3:
+			////BOTTOM LEFT
+			console.log("QUAD3")
+			enemyMesh.position.set((Math.floor(Math.random() * -100)), (Math.floor(Math.random() * -75)), 100)
+			console.log(enemyMesh.position)
+			break;
+		case 4:
+			////BOTTOM RIGHT
+			console.log("QUAD4")
+			enemyMesh.position.set((Math.floor(Math.random() * 100)), (Math.floor(Math.random() * -75)), 100)
+			console.log(enemyMesh.position)
+			break;
+	//default:
+	////CENTERED
+		//enemyMesh.position.set(0, 0, 100)
+	}            
+	scene.add(enemyMesh)
 }
