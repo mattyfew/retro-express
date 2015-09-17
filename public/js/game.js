@@ -88,8 +88,12 @@ rexMesh.rotateX(1.5707963268);
 rexPivot.translateZ(100);
 rexPivot.add(rexMesh);
 
+////ENEMY PIVOT (PARENT CONTROL)
+var enemyPivot = new THREE.Object3D();
+scene.add( enemyPivot )
+
 ////SET OBSTACLES ON INTERVAL
-setInterval(createEnemy, 2000)
+setInterval(createEnemy, 1000)
 
 ////RENDER
 var render = function () {
@@ -106,9 +110,8 @@ var render = function () {
 	shipControls();
 
 	if (typeof enemyMesh!= "undefined"){
-		enemyMesh.translateZ(1.5)
+		enemyPivot.translateZ(1)
 	}
-	
 	renderer.render(scene, camera);
 };
 
@@ -164,7 +167,17 @@ function shipControls() {
 ////ENEMY GENERATION
 
 function createEnemy() {
-	var enemyGeometry = new THREE.BoxGeometry(25, 25, 25)
+	
+	if (typeof enemyMesh != "undefined"){
+		console.log("detected enemy!")
+		var lastEnemyPosition = enemyMesh.position.z;
+		var newEnemyPosition = lastEnemyPosition - 100;
+		console.log(lastEnemyPosition)
+	}else{
+		var newEnemyPosition = 100;
+	}
+	
+	var enemyGeometry = new THREE.BoxGeometry(Math.floor(Math.random() * 50), Math.floor(Math.random() * 50), Math.floor(Math.random() * 50))
 	var enemyMaterial = new THREE.MeshBasicMaterial({color: 0x00FF00,wireframe: true});
 	enemyMesh = new THREE.Mesh(enemyGeometry, enemyMaterial);
 
@@ -174,30 +187,31 @@ function createEnemy() {
 		case 0:
 			////TOP RIGHT
 			console.log("QUAD1")
-			enemyMesh.position.set((Math.floor(Math.random() * 125)), (Math.floor(Math.random() * 75)), 100)
+			enemyMesh.position.set((Math.floor(Math.random() * 125)), (Math.floor(Math.random() * 75)), newEnemyPosition)
 			console.log(enemyMesh.position)
 			break;
 		case 1:
 			////TOP LEFT
 			console.log("QUAD2")
-			enemyMesh.position.set((Math.floor(Math.random() * -125)), (Math.floor(Math.random() * 75)), 100)
+			enemyMesh.position.set((Math.floor(Math.random() * -125)), (Math.floor(Math.random() * 75)), newEnemyPosition)
 			console.log(enemyMesh.position)
 			break;
 		case 2:
 			////BOTTOM LEFT
 			console.log("QUAD3")
-			enemyMesh.position.set((Math.floor(Math.random() * -125)), (Math.floor(Math.random() * -75)), 100)
+			enemyMesh.position.set((Math.floor(Math.random() * -125)), (Math.floor(Math.random() * -75)), newEnemyPosition)
 			console.log(enemyMesh.position)
 			break;
 		case 3:
 			////BOTTOM RIGHT
 			console.log("QUAD4")
-			enemyMesh.position.set((Math.floor(Math.random() * 125)), (Math.floor(Math.random() * -75)), 100)
+			enemyMesh.position.set((Math.floor(Math.random() * 125)), (Math.floor(Math.random() * -75)), newEnemyPosition)
 			console.log(enemyMesh.position)
 			break;
 	//default:
-	////CENTERED
+	////CENTERE
 		//enemyMesh.position.set(0, 0, 100)
-	}            
-	scene.add(enemyMesh)
+	}
+
+	enemyPivot.add(enemyMesh)
 }
