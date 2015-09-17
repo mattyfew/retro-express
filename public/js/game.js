@@ -89,7 +89,7 @@ rexPivot.translateZ(100);
 rexPivot.add(rexMesh);
 
 ////SET OBSTACLES ON INTERVAL
-setInterval(createEnemy, 1000)
+setInterval(createEnemy, 2000)
 
 ////RENDER
 var render = function () {
@@ -171,28 +171,28 @@ function createEnemy() {
 	var switchNum = Math.floor(Math.random()*4);
 	console.log(switchNum)
 	switch(switchNum){
-		case 1:
+		case 0:
 			////TOP RIGHT
 			console.log("QUAD1")
-			enemyMesh.position.set((Math.floor(Math.random() * 100)), (Math.floor(Math.random() * 75)), 100)
+			enemyMesh.position.set((Math.floor(Math.random() * 125)), (Math.floor(Math.random() * 75)), 100)
+			console.log(enemyMesh.position)
+			break;
+		case 1:
+			////TOP LEFT
+			console.log("QUAD2")
+			enemyMesh.position.set((Math.floor(Math.random() * -125)), (Math.floor(Math.random() * 75)), 100)
 			console.log(enemyMesh.position)
 			break;
 		case 2:
-			////TOP LEFT
-			console.log("QUAD2")
-			enemyMesh.position.set((Math.floor(Math.random() * -100)), (Math.floor(Math.random() * 75)), 100)
+			////BOTTOM LEFT
+			console.log("QUAD3")
+			enemyMesh.position.set((Math.floor(Math.random() * -125)), (Math.floor(Math.random() * -75)), 100)
 			console.log(enemyMesh.position)
 			break;
 		case 3:
-			////BOTTOM LEFT
-			console.log("QUAD3")
-			enemyMesh.position.set((Math.floor(Math.random() * -100)), (Math.floor(Math.random() * -75)), 100)
-			console.log(enemyMesh.position)
-			break;
-		case 4:
 			////BOTTOM RIGHT
 			console.log("QUAD4")
-			enemyMesh.position.set((Math.floor(Math.random() * 100)), (Math.floor(Math.random() * -75)), 100)
+			enemyMesh.position.set((Math.floor(Math.random() * 125)), (Math.floor(Math.random() * -75)), 100)
 			console.log(enemyMesh.position)
 			break;
 	//default:
