@@ -53,8 +53,8 @@ camera.position.set(0, 0, 300);
 camera.lookAt( scene.position );
 
 ////CAMERA2
-var camera2 = new THREE.PerspectiveCamera(75, displayWidth / displayHeight, 0.1, 2500);
-camera2.position.set(300, 0, 0);
+var camera2 = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 2500);
+camera2.position.set(1000, 0, 0);
 camera2.rotateY(1.5707963268);
 //camera2.lookAt( scene.position );
 
@@ -87,7 +87,7 @@ var cubeMaterial = new THREE.MeshBasicMaterial( { color: 0x666666, wireframe: tr
 var cubeMesh = new THREE.Mesh( cubeGeometry, cubeMaterial );
 var cubeMeshSpeed = 32;
 cubeMesh.material.side = THREE.DoubleSide;
-cubeMesh.position.y = -250;
+//cubeMesh.position.y = -250;
 scene.add( cubeMesh );
 
 ////REX (SPACESHIP) - CENTERED ON AXIS
@@ -107,7 +107,7 @@ rexPivot.add(rexMesh);
 
 ////ENEMY PIVOT (PARENT CONTROL - USE THIS TO MOVE REX)
 var enemyPivot = new THREE.Object3D();
-var enemyPivotSpeed = 40;
+var enemyPivotSpeed = 10;
 var enemyId = 0;
 scene.add( enemyPivot )
 
@@ -129,8 +129,8 @@ var render = function () {
 	cubeMesh.translateZ(cubeMeshSpeed);
 
 	////PSYCHEDLEIC MODE	
-	//cubeMesh.material.color.setHex( "0x" + newColor );
-	//rexMesh.material.color.setHex( "0x" + newColor );
+//	cubeMesh.material.color.setHex( "0x" + newColor );
+//	rexMesh.material.color.setHex( "0x" + newColor );
 
 	////REX WOBBLE AND REX CONTROLS
 	rexWobble();
@@ -233,19 +233,19 @@ function createEnemy() {
 		switch(switchNum){
 			case 0:
 				////TOP RIGHT
-				enemyMesh.position.set((Math.floor(Math.random() * 200)), (Math.floor(Math.random() * 75)), newEnemyPosition)
+				enemyMesh.position.set((Math.floor(Math.random() * 500)), (Math.floor(Math.random() * 400)), newEnemyPosition)
 				break;
 			case 1:
 				////TOP LEFT
-				enemyMesh.position.set((Math.floor(Math.random() * -200)), (Math.floor(Math.random() * 75)), newEnemyPosition)
+				enemyMesh.position.set((Math.floor(Math.random() * -500)), (Math.floor(Math.random() * 400)), newEnemyPosition)
 				break;
 			case 2:
 				////BOTTOM LEFT
-				enemyMesh.position.set((Math.floor(Math.random() * -200)), (Math.floor(Math.random() * -75)), newEnemyPosition)
+				enemyMesh.position.set((Math.floor(Math.random() * -500)), (Math.floor(Math.random() * -400)), newEnemyPosition)
 				break;
 			case 3:
 				////BOTTOM RIGHT
-				enemyMesh.position.set((Math.floor(Math.random() * 200)), (Math.floor(Math.random() * -75)), newEnemyPosition)
+				enemyMesh.position.set((Math.floor(Math.random() * 51200)), (Math.floor(Math.random() * -400)), newEnemyPosition)
 				break;
 			default:
 				////CENTER
@@ -254,11 +254,9 @@ function createEnemy() {
 		enemyPivot.add(enemyMesh)
 	}
 }
+
 ////DELETE ENEMY
 function deleteEnemy(){
-//	if(enemyPivot.children[0].matrixWorld.elements[14] > 300){
-//		enemyPivot.remove(enemyPivot.children[0])
-//	}
 	enemyPivot.remove(enemyPivot.children[0])
 }
 
