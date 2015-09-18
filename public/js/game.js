@@ -10,14 +10,14 @@ var clock = new THREE.Clock();
 Physijs.scripts.worker = '/physijs/physijs_worker.js'
 Physijs.scripts.ammo = '/physijs/examples/js/ammo.js';
 
-////DEFINE KEYPRESS EVENT LISTENERS
-////REX X & Y MOTION
+////DEFINE KEYPRESS EVENT LISTENERS (X & Y MOTION AND CAMERA CHOOSER)
 window.addEventListener('keyup', function(event) { Key.onKeyup(event); }, false);
 window.addEventListener('keydown', function(event) { Key.onKeydown(event); }, false);
 var Key = {
 	_pressed: {},
 	left: 37,up: 38,right: 39,down: 40,
 	A: 65,W: 87,D: 68,S: 83,
+	one: 49, two: 50,
 	isDown: function(keyCode) {return this._pressed[keyCode];},
 	onKeydown: function(event) {this._pressed[event.keyCode] = true;},
 	onKeyup: function(event) {delete this._pressed[event.keyCode];}
@@ -34,13 +34,15 @@ display.appendChild(renderer.domElement);
 
 ////WINDOW RESIZE LISTENER
 window.addEventListener('resize', onWindowResize, false);
-function onWindowResize() {
-	var displayWidth = parseInt(displayStyle.width);
-	var displayHeight = parseInt(displayStyle.width) / 2;
-	camera.aspect = displayWidth / displayHeight;
-	camera.updateProjectionMatrix();
-	renderer.setSize(displayWidth, displayHeight);
-}
+
+////DOM SETUP - SCORE COUNTER
+var scoreCounter = 0;
+var scoreDisplay = document.createElement('div');
+scoreDisplay.style.position = 'absolute';
+scoreDisplay.style.top = '2%';
+scoreDisplay.style.left = '2%';
+scoreDisplay.innerHTML = '<h1>SCORE: ' + scoreCounter + '</h1>' ;
+display.appendChild(scoreDisplay);
 
 ////LIGHTS
 scene.add(new THREE.AmbientLight(0xCCCCCC));
@@ -49,6 +51,14 @@ scene.add(new THREE.AmbientLight(0xCCCCCC));
 var camera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 2500);
 camera.position.set(0, 0, 300);
 camera.lookAt( scene.position );
+
+////CAMERA2
+var camera2 = new THREE.PerspectiveCamera(75, displayWidth / displayHeight, 0.1, 2500);
+camera2.position.set(300, 0, 0);
+camera2.rotateY(1.5707963268);
+//camera2.lookAt( scene.position );
+
+var cameraSwitcher = "camera"
 
 ////FOG
 scene.fog = new THREE.FogExp2( 0x000000, 0.0005);
@@ -83,6 +93,7 @@ scene.add( cubeMesh );
 ////REX (SPACESHIP) - CENTERED ON AXIS
 var rexPivot = new THREE.Object3D();
 scene.add( rexPivot )
+
 var rexShape = new THREE.Shape();
 rexShapeData()//GRABS SVG DATA
 var rexExtrusion = {amount: 4,bevelEnabled: false};
@@ -97,16 +108,12 @@ rexPivot.add(rexMesh);
 ////ENEMY PIVOT (PARENT CONTROL - USE THIS TO MOVE REX)
 var enemyPivot = new THREE.Object3D();
 var enemyPivotSpeed = 40;
-
 var enemyId = 0;
 scene.add( enemyPivot )
 
-////SET OBSTACLES ON INTERVAL
+////CREATE AND DELETE OBSTACLES ON INTERVAL
 var enemyCreateInterval = setInterval(createEnemy, 10)	
-
-
-////DELETE OBSTACLES ON INTERVAL
-var enemyDeleteInterval = setInterval(deleteEnemy, 10)
+//var enemyDeleteInterval = setInterval(deleteEnemy, 10)
 
 ////RENDER
 var render = function () {
@@ -128,11 +135,26 @@ var render = function () {
 	////REX WOBBLE AND REX CONTROLS
 	rexWobble();
 	shipControls();
-
+	
+	////CHECK IF ENEMIES EXIST
 	if (typeof enemyMesh!= "undefined"){
 		enemyPivot.translateZ(enemyPivotSpeed)
+		if(enemyPivot.children[0].matrixWorld.elements[14] > 500){
+			scoreCounter += 1;
+			scoreDisplay.innerHTML = '<h1>SCORE: ' + scoreCounter + '</h1>' ;
+			deleteEnemy()
+		}
 	}
-	renderer.render(scene, camera);
+	
+	////CAMERA SWITCHER
+	if (cameraSwitcher === "camera"){
+		renderer.render(scene, camera);
+	} else if (cameraSwitcher === "camera2"){
+		renderer.render(scene, camera2);
+	} else {
+		renderer.render(scene, camera);
+	}
+	
 };
 
 render();
@@ -171,6 +193,8 @@ function shipControls() {
 	if (Key.isDown(Key.right) || Key.isDown(Key.D)) {if(rexPivot.position.x < 100){rexPivot.translateX(5),rexMesh.rotateY(-.005), scene.rotateZ(-.001)}}
 	if (Key.isDown(Key.up) || Key.isDown(Key.W)) {if(rexPivot.position.y < 65){rexPivot.translateY(3.2),rexMesh.rotateX(-.003), scene.rotateX(-.001)}}
 	if (Key.isDown(Key.down) || Key.isDown(Key.S)) {if(rexPivot.position.y > -65){rexPivot.translateY(-3.2),rexMesh.rotateX(.003), scene.rotateX(.001)}}
+	if (Key.isDown(Key.one)) {cameraSwitcher = "camera"}
+	if (Key.isDown(Key.two)) {cameraSwitcher = "camera2"}
 }
 
 ////ENEMY GENERATION
@@ -232,7 +256,17 @@ function createEnemy() {
 }
 ////DELETE ENEMY
 function deleteEnemy(){
-	if(enemyPivot.children[0].matrixWorld.elements[14] > 300){
-		enemyPivot.remove(enemyPivot.children[0])
-	}
+//	if(enemyPivot.children[0].matrixWorld.elements[14] > 300){
+//		enemyPivot.remove(enemyPivot.children[0])
+//	}
+	enemyPivot.remove(enemyPivot.children[0])
+}
+
+////WINDOW RESIZE
+function onWindowResize() {
+	var displayWidth = parseInt(displayStyle.width);
+	var displayHeight = parseInt(displayStyle.width) / 2;
+	camera.aspect = displayWidth / displayHeight;
+	camera.updateProjectionMatrix();
+	renderer.setSize(displayWidth, displayHeight);
 }
