@@ -1,10 +1,14 @@
 console.log("GAME.JS")
 
 ////CREATE SCENE
-var scene = new THREE.Scene();
+var scene = new Physijs.Scene();
 
 ////CREATE CLOCK
 var clock = new THREE.Clock();
+
+////REQUIRE PHYSI.JS
+Physijs.scripts.worker = '/physijs/physijs_worker.js'
+Physijs.scripts.ammo = '/physijs/examples/js/ammo.js';
 
 ////DEFINE KEYPRESS EVENT LISTENERS
 ////REX X & Y MOTION
@@ -83,7 +87,7 @@ rexShapeData()//GRABS SVG DATA
 var rexExtrusion = {amount: 4,bevelEnabled: false};
 var rexGeometry = new THREE.ExtrudeGeometry(rexShape, rexExtrusion);
 var rexMaterial = new THREE.MeshBasicMaterial({color: 0x00FF00, wireframe: true});
-var rexMesh = new THREE.Mesh(rexGeometry, rexMaterial);
+var rexMesh = new Physijs.ConvexMesh(rexGeometry, rexMaterial);
 var rexDirection = "up";
 rexMesh.rotateX(1.5707963268);
 rexPivot.translateZ(100);
@@ -104,7 +108,9 @@ setInterval(deleteEnemy, 20)
 
 ////RENDER
 var render = function () {
+
 	requestAnimationFrame(render);
+	scene.simulate() //start physics
 	var delta = clock.getDelta()
 	var time = clock.getElapsedTime()*10;
 	var newColor = Math.floor(Math.random()*16777215).toString(16);
@@ -180,7 +186,17 @@ function createEnemy() {
 	
 	var enemyGeometry = new THREE.BoxGeometry(Math.floor(Math.random() * 45) + 5, Math.floor(Math.random() * 45) + 5, Math.floor(Math.random() * 45) + 5)
 	var enemyMaterial = new THREE.MeshBasicMaterial({color: enemyColor,wireframe: true});
-	enemyMesh = new THREE.Mesh(enemyGeometry, enemyMaterial);
+	
+	//PHYSI.JS
+	enemyMesh = new Physijs.BoxMesh(enemyGeometry, enemyMaterial);
+	//console.log(linearVelocity)
+	enemyMesh.addEventListener('collision', function( rex, linearVelocity, angularVelocity ){
+		console.log("linearVelocity: " + linearVelocity)
+		console.log("angularVelocity: " + angularVelocity)
+		if(rex.name === "rex"){
+			alert("COLLISION!!!!!!")
+		}
+	})
 
 	enemyId += 1;
 	enemyMesh.name = "enemy" + parseInt(enemyId);
