@@ -110,7 +110,7 @@ rexPivot.add(rexMesh);
 
 ////ENEMY PIVOT (PARENT CONTROL - USE THIS TO MOVE REX)
 var enemyPivot = new THREE.Object3D();
-var enemyPivotSpeed = 10;
+var enemyPivotSpeed = 50;
 var enemyId = 0;
 scene.add( enemyPivot )
 
@@ -165,6 +165,7 @@ var render = function () {
 		enemyPivot.translateZ(0)
 		gridLine.translateZ(0);
 		cubeMesh.translateZ(0);
+		setTimeout(function(){gameState = "init", scoreCounter = 0},5000)
 	}
 	
 };
