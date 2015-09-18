@@ -88,12 +88,22 @@ rexMesh.rotateX(1.5707963268);
 rexPivot.translateZ(100);
 rexPivot.add(rexMesh);
 
-////ENEMY PIVOT (PARENT CONTROL)
+////ENEMY PIVOT (PARENT CONTROL - USE THIS TO MOVE REX)
 var enemyPivot = new THREE.Object3D();
 scene.add( enemyPivot )
 
+////CREATE ENEMY ARRAY (USED FOR DELETION)
+var enemyId = 0;
+var enemyArray = [];
+
 ////SET OBSTACLES ON INTERVAL
-setInterval(createEnemy, 1000)
+setInterval(createEnemy, 20)
+
+////DELETE OBSTACLES 
+
+//if (enemyArray.length > 100){
+//	console.log("DEPR DERP DERP!!!!")
+//}
 
 ////RENDER
 var render = function () {
@@ -101,26 +111,24 @@ var render = function () {
 	var delta = clock.getDelta()
 	var time = clock.getElapsedTime()*10;
 	var newColor = Math.floor(Math.random()*16777215).toString(16);
-	console.log(newColor)
 	
+	////WORLD TRANSLATION
 	gridLine.translateZ(1.5);
-
-	//cubeMesh.rotation.z += 0.01;
 	cubeMesh.translateZ(1.5);
 	
-	
-//	cubeMesh.material.color.setHex( "0x" + newColor );
-//	rexMesh.material.color.setHex( "0x" + newColor );
-	
-	
-	
+	////PSYCHEDLEIC MODE	
+	//cubeMesh.material.color.setHex( "0x" + newColor );
+	//rexMesh.material.color.setHex( "0x" + newColor );
+
+	////REX WOBBLE AND REX CONTROLS
 	rexWobble();
 	shipControls();
 
 	if (typeof enemyMesh!= "undefined"){
-		enemyPivot.translateZ(1)
+		enemyPivot.translateZ(33)
 	}
 	renderer.render(scene, camera);
+	//debugger
 };
 
 render();
@@ -151,17 +159,6 @@ function rexShapeData(){
 	rexShape.lineTo(-50, 21.8);
 	rexShape.lineTo(-9.3, -17.7);
 }
-////REX (SPACESHIP) - ORIGINAL COORDINATES
-//rexShape.moveTo(100, 56.8);
-//rexShape.lineTo(59.3, 18.7);
-//rexShape.lineTo(50, 0);
-//rexShape.lineTo(40.7, 18.7);
-//rexShape.lineTo(0, 56.8);
-//rexShape.lineTo(21.8, 56.8);
-//rexShape.lineTo(43.4, 56.8);
-//rexShape.lineTo(50, 70);
-//rexShape.lineTo(56.6, 56.8);
-//rexShape.lineTo(78.2, 56.8);
 
 //// SHIP CONTROLS - TRANSLATES REX ON KEYPRESS
 function shipControls() {
@@ -176,12 +173,17 @@ function shipControls() {
 
 function createEnemy() {
 
+//	console.log(scene.enemyPivot.children.length)
+//	if (scene.enemyPivot.children.length > 5){
+//		console.log("Merp!")
+////		enemyPivot.remove(enemyPivot.children[0])
+//	}
+	
 	var newColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+	
 	if (typeof enemyMesh != "undefined"){
-		console.log("detected enemy!")
 		var lastEnemyPosition = enemyMesh.position.z;
 		var newEnemyPosition = lastEnemyPosition - 100;
-		console.log(lastEnemyPosition)
 	}else{
 		var newEnemyPosition = 100;
 	}
@@ -190,37 +192,32 @@ function createEnemy() {
 	var enemyMaterial = new THREE.MeshBasicMaterial({color: newColor,wireframe: true});
 	enemyMesh = new THREE.Mesh(enemyGeometry, enemyMaterial);
 
+	enemyId += 1;
+	console.log(enemyId)
+	enemyMesh.name = "enemy" + parseInt(enemyId);
+	
 	var switchNum = Math.floor(Math.random()*4);
-	console.log(switchNum)
 	switch(switchNum){
 		case 0:
 			////TOP RIGHT
-			console.log("QUAD1")
-			enemyMesh.position.set((Math.floor(Math.random() * 125)), (Math.floor(Math.random() * 75)), newEnemyPosition)
-			console.log(enemyMesh.position)
+			enemyMesh.position.set((Math.floor(Math.random() * 200)), (Math.floor(Math.random() * 75)), newEnemyPosition)
 			break;
 		case 1:
 			////TOP LEFT
-			console.log("QUAD2")
-			enemyMesh.position.set((Math.floor(Math.random() * -125)), (Math.floor(Math.random() * 75)), newEnemyPosition)
-			console.log(enemyMesh.position)
+			enemyMesh.position.set((Math.floor(Math.random() * -200)), (Math.floor(Math.random() * 75)), newEnemyPosition)
 			break;
 		case 2:
 			////BOTTOM LEFT
-			console.log("QUAD3")
-			enemyMesh.position.set((Math.floor(Math.random() * -125)), (Math.floor(Math.random() * -75)), newEnemyPosition)
-			console.log(enemyMesh.position)
+			enemyMesh.position.set((Math.floor(Math.random() * -200)), (Math.floor(Math.random() * -75)), newEnemyPosition)
 			break;
 		case 3:
 			////BOTTOM RIGHT
-			console.log("QUAD4")
-			enemyMesh.position.set((Math.floor(Math.random() * 125)), (Math.floor(Math.random() * -75)), newEnemyPosition)
-			console.log(enemyMesh.position)
+			enemyMesh.position.set((Math.floor(Math.random() * 200)), (Math.floor(Math.random() * -75)), newEnemyPosition)
 			break;
-	//default:
-	////CENTERE
-		//enemyMesh.position.set(0, 0, 100)
+		default:
+			////CENTER
+			enemyMesh.position.set(0, 0, newEnemyPosition)
 	}
-
+//	enemyArray.push(enemyMesh);
 	enemyPivot.add(enemyMesh)
 }
