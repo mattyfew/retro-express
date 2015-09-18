@@ -1,5 +1,8 @@
 console.log("GAME.JS")
 
+////GAME STATE
+var gameState = "init";
+
 ////CREATE SCENE
 var scene = new Physijs.Scene();
 
@@ -119,40 +122,49 @@ var enemyCreateInterval = setInterval(createEnemy, 10)
 var render = function () {
 
 	requestAnimationFrame(render);
-	scene.simulate() //start physics
-	var delta = clock.getDelta()
-	var time = clock.getElapsedTime()*10;
-	var newColor = Math.floor(Math.random()*16777215).toString(16);
-	
-	////WORLD TRANSLATION
-	gridLine.translateZ(gridLineSpeed);
-	cubeMesh.translateZ(cubeMeshSpeed);
 
-	////PSYCHEDLEIC MODE	
-//	cubeMesh.material.color.setHex( "0x" + newColor );
-//	rexMesh.material.color.setHex( "0x" + newColor );
+	////GAME STATE SWITCHER
+	if (gameState === "init"){
+		checkForCollision();
+		scene.simulate() //start physics
+		var delta = clock.getDelta()
+		var time = clock.getElapsedTime()*10;
+		var newColor = Math.floor(Math.random()*16777215).toString(16);
+		
+		////WORLD TRANSLATION
+		gridLine.translateZ(gridLineSpeed);
+		cubeMesh.translateZ(cubeMeshSpeed);
+		
+		////PSYCHEDLEIC MODE	
+		//	cubeMesh.material.color.setHex( "0x" + newColor );
+		//	rexMesh.material.color.setHex( "0x" + newColor );
 
-	////REX WOBBLE AND REX CONTROLS
-	rexWobble();
-	shipControls();
-	
-	////CHECK IF ENEMIES EXIST
-	if (typeof enemyMesh!= "undefined"){
-		enemyPivot.translateZ(enemyPivotSpeed)
-		if(enemyPivot.children[0].matrixWorld.elements[14] > 500){
-			scoreCounter += 1;
-			scoreDisplay.innerHTML = '<h1>SCORE: ' + scoreCounter + '</h1>' ;
-			deleteEnemy()
+		////REX WOBBLE AND REX CONTROLS
+		rexWobble();
+		shipControls();
+		
+		////CHECK IF ENEMIES EXIST
+		if (typeof enemyMesh!= "undefined"){
+			enemyPivot.translateZ(enemyPivotSpeed)
+			if(enemyPivot.children[0].matrixWorld.elements[14] > 500){
+				scoreCounter += 1;
+				scoreDisplay.innerHTML = '<h1>SCORE: ' + scoreCounter + '</h1>' ;
+				deleteEnemy()
+			}
 		}
-	}
-	
-	////CAMERA SWITCHER
-	if (cameraSwitcher === "camera"){
-		renderer.render(scene, camera);
-	} else if (cameraSwitcher === "camera2"){
-		renderer.render(scene, camera2);
-	} else {
-		renderer.render(scene, camera);
+		
+		////CAMERA SWITCHER
+		if (cameraSwitcher === "camera"){
+			renderer.render(scene, camera);
+		} else if (cameraSwitcher === "camera2"){
+			renderer.render(scene, camera2);
+		} else {
+			renderer.render(scene, camera);
+		}
+	} else if (gameState === "dead"){
+		enemyPivot.translateZ(0)
+		gridLine.translateZ(0);
+		cubeMesh.translateZ(0);
 	}
 	
 };
@@ -218,16 +230,8 @@ function createEnemy() {
 		enemyId += 1;
 		enemyMesh.name = "enemy" + parseInt(enemyId);
 
-		//PHYSI.JS
+		////PHYSI.JS
 		enemyMesh = new Physijs.BoxMesh(enemyGeometry, enemyMaterial);
-		//console.log(linearVelocity)
-		enemyMesh.addEventListener('collision', function( rex, linearVelocity, angularVelocity ){
-			console.log("linearVelocity: " + linearVelocity)
-			console.log("angularVelocity: " + angularVelocity)
-			if(rex.name === "rex"){
-				alert("COLLISION!!!!!!")
-			}
-		})
 		
 		var switchNum = Math.floor(Math.random()*4);
 		switch(switchNum){
@@ -258,6 +262,19 @@ function createEnemy() {
 ////DELETE ENEMY
 function deleteEnemy(){
 	enemyPivot.remove(enemyPivot.children[0])
+}
+
+////CHECK FOR COLLISION
+function checkForCollision(){
+	for(var i = 0; i < enemyPivot.children.length; i++){
+		var rexPosition = new THREE.Box3().setFromObject(rexMesh)
+		var enemyPosition = new THREE.Box3().setFromObject(enemyPivot.children[i])
+
+		if (enemyPosition.isIntersectionBox(rexPosition)){
+			gameState = "dead";
+			console.log(gameState);
+		}
+	}
 }
 
 ////WINDOW RESIZE
