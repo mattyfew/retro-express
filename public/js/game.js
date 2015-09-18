@@ -63,6 +63,7 @@ for (var i = - gridSize; i <= gridSize; i += gridStep){
 	gridGeometry.vertices.push(new THREE.Vector3( i, - 0.04, gridSize ));
 }
 var gridLine = new THREE.Line( gridGeometry, gridMaterial, THREE.LinePieces);
+var gridLineSpeed = 32;
 gridLine.position.y = -500;
 scene.add(gridLine);
 
@@ -70,10 +71,10 @@ scene.add(gridLine);
 var cubeGeometry = new THREE.BoxGeometry( 2000, 1000, 300000,10,10,1000);
 var cubeMaterial = new THREE.MeshBasicMaterial( { color: 0x666666, wireframe: true} );
 var cubeMesh = new THREE.Mesh( cubeGeometry, cubeMaterial );
-scene.add( cubeMesh );
-cubeMesh.position.y = -250;
+var cubeMeshSpeed = 32;
 cubeMesh.material.side = THREE.DoubleSide;
-
+cubeMesh.position.y = -250;
+scene.add( cubeMesh );
 ////REX (SPACESHIP) - CENTERED ON AXIS
 var rexPivot = new THREE.Object3D();
 scene.add( rexPivot )
@@ -90,20 +91,16 @@ rexPivot.add(rexMesh);
 
 ////ENEMY PIVOT (PARENT CONTROL - USE THIS TO MOVE REX)
 var enemyPivot = new THREE.Object3D();
-scene.add( enemyPivot )
+var enemyPivotSpeed = 32;
 
-////CREATE ENEMY ARRAY (USED FOR DELETION)
 var enemyId = 0;
-var enemyArray = [];
+scene.add( enemyPivot )
 
 ////SET OBSTACLES ON INTERVAL
 setInterval(createEnemy, 20)
 
-////DELETE OBSTACLES 
-
-//if (enemyArray.length > 100){
-//	console.log("DEPR DERP DERP!!!!")
-//}
+////DELETE OBSTACLES ON INTERVAL
+setInterval(deleteEnemy, 20)
 
 ////RENDER
 var render = function () {
@@ -113,8 +110,8 @@ var render = function () {
 	var newColor = Math.floor(Math.random()*16777215).toString(16);
 	
 	////WORLD TRANSLATION
-	gridLine.translateZ(1.5);
-	cubeMesh.translateZ(1.5);
+	gridLine.translateZ(gridLineSpeed);
+	cubeMesh.translateZ(cubeMeshSpeed);
 	
 	////PSYCHEDLEIC MODE	
 	//cubeMesh.material.color.setHex( "0x" + newColor );
@@ -125,7 +122,7 @@ var render = function () {
 	shipControls();
 
 	if (typeof enemyMesh!= "undefined"){
-		enemyPivot.translateZ(33)
+		enemyPivot.translateZ(enemyPivotSpeed)
 	}
 	renderer.render(scene, camera);
 	//debugger
@@ -172,15 +169,6 @@ function shipControls() {
 ////ENEMY GENERATION
 
 function createEnemy() {
-
-//	console.log(scene.enemyPivot.children.length)
-//	if (scene.enemyPivot.children.length > 5){
-//		console.log("Merp!")
-////		enemyPivot.remove(enemyPivot.children[0])
-//	}
-	
-	var newColor = '#'+Math.floor(Math.random()*16777215).toString(16);
-	
 	if (typeof enemyMesh != "undefined"){
 		var lastEnemyPosition = enemyMesh.position.z;
 		var newEnemyPosition = lastEnemyPosition - 100;
@@ -188,12 +176,13 @@ function createEnemy() {
 		var newEnemyPosition = 100;
 	}
 	
-	var enemyGeometry = new THREE.BoxGeometry(Math.floor(Math.random() * 50), Math.floor(Math.random() * 50), Math.floor(Math.random() * 50))
-	var enemyMaterial = new THREE.MeshBasicMaterial({color: newColor,wireframe: true});
+	var enemyColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+	
+	var enemyGeometry = new THREE.BoxGeometry(Math.floor(Math.random() * 45) + 5, Math.floor(Math.random() * 45) + 5, Math.floor(Math.random() * 45) + 5)
+	var enemyMaterial = new THREE.MeshBasicMaterial({color: enemyColor,wireframe: true});
 	enemyMesh = new THREE.Mesh(enemyGeometry, enemyMaterial);
 
 	enemyId += 1;
-	console.log(enemyId)
 	enemyMesh.name = "enemy" + parseInt(enemyId);
 	
 	var switchNum = Math.floor(Math.random()*4);
@@ -218,6 +207,18 @@ function createEnemy() {
 			////CENTER
 			enemyMesh.position.set(0, 0, newEnemyPosition)
 	}
-//	enemyArray.push(enemyMesh);
 	enemyPivot.add(enemyMesh)
+}
+
+////DELETE ENEMY
+function deleteEnemy(){
+	if (enemyPivot.children.length > 1000){
+//		var enemyDepth = enemyPivot.children[0].geometry.parameters.depth
+//		console.log(enemyDepth)
+//		
+//		enemyPivot.remove(enemyPivot.children[0])
+//		enemyPivot.position.z += enemyDepth - enemyPivotSpeed
+//		console.log(enemyPivot.children[0])
+//		console.log(enemyPivot.children.length)
+	}
 }
