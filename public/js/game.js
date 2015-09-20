@@ -4,7 +4,7 @@ console.log("GAME.JS")
 Math.radians = function(degrees) {return degrees * Math.PI / 180;};
 
 ////GAME STATE
-var gameState = "init";
+var gameState = "menu";
 
 ////CREATE SCENE
 var scene = new Physijs.Scene();
@@ -15,6 +15,8 @@ var clock = new THREE.Clock();
 ////REQUIRE PHYSI.JS
 Physijs.scripts.worker = '/physijs/physijs_worker.js'
 Physijs.scripts.ammo = '/physijs/examples/js/ammo.js';
+
+
 
 ////DEFINE KEYPRESS EVENT LISTENERS (X & Y MOTION AND CAMERA CHOOSER)
 window.addEventListener('keyup', function(event) { event.preventDefault(); Key.onKeyup(event); }, false);
@@ -63,11 +65,25 @@ window.addEventListener('resize', onWindowResize, false);
 ////DOM SETUP - SCORE COUNTER
 var scoreCounter = 0;
 var scoreDisplay = document.createElement('div');
-scoreDisplay.style.position = 'absolute';
-scoreDisplay.style.top = '2%';
-scoreDisplay.style.left = '2%';
+scoreDisplay.id = 'score-display'
+
 scoreDisplay.innerHTML = '<h1>SCORE: ' + scoreCounter + '</h1>';
 display.appendChild(scoreDisplay);
+
+////DOM SETUP - START GAME
+var startButton = document.createElement('button');
+startButton.id = "start-button"
+startButton.innerHTML = 'START GAME';
+
+////DOM SETUP - RESET GAME
+var resetButton = document.createElement('button');
+resetButton.id = "reset-button"
+resetButton.innerHTML = 'RESET GAME';
+
+////DEFINE BUTTON PRESS GAME STATES
+startButton.addEventListener('click',function(){gameState = "init"; startButton.remove()})
+resetButton.addEventListener('click',function(){gameState = "menu"; resetButton.remove(); scene.remove(enemyPivot)})
+
 
 ////LIGHTS
 scene.add(new THREE.AmbientLight(0xCCCCCC));
@@ -82,6 +98,22 @@ var camera2 = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1,
 camera2.position.set(1000, 0, -300);
 camera2.rotateY(Math.radians(90));
 //camera2.lookAt(scene.position);
+
+////ORBIT CAMERA
+var orbitCamera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 2500);
+orbitCamera.position.set(200, 0, 0);
+
+
+
+////ORBIT CONTROLS
+orbitControls = new THREE.OrbitControls( orbitCamera, renderer.domElement );
+//orbitControls.addEventListener( 'change', render ); // add this only if there is no animation loop (requestAnimationFrame)
+orbitControls.enableDamping = true;
+orbitControls.dampingFactor = 0.25;
+orbitControls.minDistance = 300;
+orbitControls.maxDistance = 1000;
+orbitControls.enableZoom = false;
+
 
 var cameraSwitcher = "camera"
 
@@ -112,6 +144,11 @@ var gridLineTop = gridLine.clone();
 gridLineTop.position.y = 500;
 scene.add(gridLineTop);
 
+////START SPHERE 
+var sphereGeometry = new THREE.SphereGeometry(150,50,50)
+var sphereColor = Math.floor(Math.random() * 16777215).toString(16);
+var sphereMaterial = new THREE.MeshBasicMaterial({color:"#" + sphereColor, wireframe: true, transparent: false, opacity: .3})
+var startSphereMesh = new THREE.Mesh(sphereGeometry, sphereMaterial)
 
 ////CUBE
 var cubeGeometry = new THREE.BoxGeometry(4000, 1100, 300000, 10, 10, 1000);
@@ -146,11 +183,16 @@ rexMesh.rotateX(Math.radians(90));
 rexPivot.translateZ(100);
 rexPivot.add(rexMesh);
 
-////ENEMY PIVOT (PARENT CONTROL - USE THIS TO MOVE REX)
+///ORBIT CAMERA DEATH
+rexPivot.add(orbitCamera)
+orbitCamera.lookAt(rexPivot.position);
+
+////ENEMY PIVOT (PARENT CONTROL - USE THIS TO MOVE BLOCKS)
 var enemyPivot = new THREE.Object3D();
 var enemyPivotSpeed = 50;
 var enemyId = 0;
 scene.add(enemyPivot)
+
 
 ////CREATE AND DELETE OBSTACLES ON INTERVAL
 var enemyCreateInterval = setInterval(createEnemy, 10)
@@ -162,7 +204,19 @@ var render = function () {
 	requestAnimationFrame(render);
 
 	////GAME STATE SWITCHER
+	////GAME STATE --> MENU
+	if (gameState === "menu"){
+		startMenu()
+		rexPivot.rotateY(Math.radians(.9))
+		startSphereMesh.rotateY(Math.radians(-.1))
+		display.appendChild(startButton);
+	}
+	
 	if (gameState === "init") {
+		scene.add(rexPivot)
+		rexPivot.rotation.y = 0;
+		rexPivot.translate.z = 100;
+		rexPivot.add(rexMesh)
 		checkForCollision();
 		scene.simulate() //start physics
 		var delta = clock.getDelta()
@@ -186,7 +240,13 @@ var render = function () {
 		
 		////END INIT STATE
 	} else if (gameState === "dead") {
-		gameState = "init"
+			cameraSwitcher = "orbitCamera"
+			cameraSwitch();
+			display.appendChild(resetButton);
+//		gameState = "init"
+		//cancelAnimationFrame(render);
+		//controls.update(); // required if controls.enableDamping = true, or if controls.autoRotate = true
+		
 //		enemyPivot.translateZ(0)
 //		gridLine.translateZ(0);
 //		cubeMesh.translateZ(0);
@@ -198,6 +258,23 @@ var render = function () {
 };
 
 render();
+
+function startMenu(){
+	var startMenuScene = new THREE.Scene()
+	startMenuScene.add(startSphereMesh)
+	startMenuScene.add(rexPivot)
+	rexPivot.position.set(0,0,0)
+	rexPivot.add(rexMesh)
+	startMenuScene.add(new THREE.AmbientLight(0xCCCCCC));
+
+	var startCamera = new THREE.PerspectiveCamera(55, displayWidth / displayHeight, 0.1, 500)
+	startCamera.position.set(0,60,100)
+	startCamera.lookAt(startMenuScene.position)
+	startMenuScene.add(startCamera)
+
+	renderer.render(startMenuScene, startCamera)
+}
+
 
 ////REX WOBBLE
 function rexWobble() {
@@ -267,6 +344,10 @@ function cameraSwitch(){
 		renderer.render(scene, camera);
 	} else if (cameraSwitcher === "camera2") {
 		renderer.render(scene, camera2);
+	} else if (cameraSwitcher === "orbitCamera"){
+//		orbitCamera.translate.x += Math.radians(1)
+		renderer.render(scene, orbitCamera);
+		
 	} else {
 		renderer.render(scene, camera);
 	}
@@ -278,9 +359,9 @@ function createEnemy() {
 
 		if (typeof enemyMesh != "undefined") {
 			var lastEnemyPosition = enemyMesh.position.z;
-			var newEnemyPosition = lastEnemyPosition - 100;
+			var newEnemyPosition = lastEnemyPosition - 200;
 		} else {
-			var newEnemyPosition = 1000;
+			var newEnemyPosition = -1000;
 		}
 
 		var enemyColor = '#' + Math.floor(Math.random() * 16777215).toString(16);

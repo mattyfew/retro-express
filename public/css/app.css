@@ -24,6 +24,7 @@ header span {
 	border: 1px solid #00FF00;
 	background-color: #222222;
 	text-align: center;
+	position:relative;
 }
 #game-info {
 	max-width: 1200px;
@@ -31,4 +32,30 @@ header span {
 	border: 1px solid #00FF00;
 	background-color: #353535;
 	text-align: center;
+}
+
+#score-display{
+	color: #00FF00;;
+	position: absolute;
+	margin: 0;
+	top: 2%;
+	left: 2%;	
+}
+
+
+#start-button,
+#reset-button{
+	position:absolute;
+	height: 20%;
+	width: 30%;
+	top: 40%;
+	left: 35%;
+	border: 1px solid #00FF00;
+	font-size: 2em;
+	background-color: #353535;
+	opacity: .75;
+}
+#reset-button:hover{
+	color: #FFFFFF;
+	opacity: 1;
 }
