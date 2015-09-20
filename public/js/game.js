@@ -73,7 +73,7 @@ display.appendChild(scoreDisplay);
 scene.add(new THREE.AmbientLight(0xCCCCCC));
 
 ////CAMERA
-var camera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 2500);
+var camera = new THREE.PerspectiveCamera(55, displayWidth / displayHeight, 0.1, 2500);
 camera.position.set(0, 100, 1000);
 camera.lookAt(scene.position);
 
@@ -108,8 +108,13 @@ var gridLineSpeed = 32;
 gridLine.position.y = -500;
 scene.add(gridLine);
 
+var gridLineTop = gridLine.clone();
+gridLineTop.position.y = 500;
+scene.add(gridLineTop);
+
+
 ////CUBE
-var cubeGeometry = new THREE.BoxGeometry(1000, 1000, 300000, 10, 10, 1000);
+var cubeGeometry = new THREE.BoxGeometry(4000, 1100, 300000, 10, 10, 1000);
 var cubeMaterial = new THREE.MeshBasicMaterial({
 	color: 0x666666,
 	wireframe: true
@@ -143,7 +148,7 @@ rexPivot.add(rexMesh);
 
 ////ENEMY PIVOT (PARENT CONTROL - USE THIS TO MOVE REX)
 var enemyPivot = new THREE.Object3D();
-var enemyPivotSpeed = 100;
+var enemyPivotSpeed = 50;
 var enemyId = 0;
 scene.add(enemyPivot)
 
@@ -161,31 +166,21 @@ var render = function () {
 		checkForCollision();
 		scene.simulate() //start physics
 		var delta = clock.getDelta()
-		var time = clock.getElapsedTime() * 10;
+		var time = parseInt(clock.getElapsedTime());
 		var newColor = Math.floor(Math.random() * 16777215).toString(16);
 
-		////WORLD TRANSLATION
-		gridLine.translateZ(gridLineSpeed);
-		cubeMesh.translateZ(cubeMeshSpeed);
+		////WORLD TRANSLATION && DIFFICULTY    
+		checkDifficulty(time) 
+		checkForEnemies()
+		
+		////REX WOBBLE AND REX CONTROLS
+		shipControls();
+		rexWobble();
 
 		////PSYCHEDLEIC MODE	
 		//	cubeMesh.material.color.setHex( "0x" + newColor );
 		//	rexMesh.material.color.setHex( "0x" + newColor );
-
-		////REX WOBBLE AND REX CONTROLS
-		rexWobble();
-		shipControls();
-
-		////CHECK IF ENEMIES EXIST
-		if (typeof enemyMesh != "undefined") {
-			enemyPivot.translateZ(enemyPivotSpeed)
-			if (enemyPivot.children[0].matrixWorld.elements[14] > 500) {
-				scoreCounter += 1;
-				scoreDisplay.innerHTML = '<h1>SCORE: ' + scoreCounter + '</h1>';
-				deleteEnemy()
-			}
-		}
-
+		
 		////CAMERA SWITCHER
 		cameraSwitch();
 		
@@ -235,12 +230,12 @@ function rexShapeData() {
 function shipControls() {
 	//ARROW KEY & WASD CONTROLS
 	if (Key.isDown(Key.left) || Key.isDown(Key.A)) {
-		if (rexPivot.position.x > -500) {
+		if (rexPivot.position.x > - 450) {
 			rexPivot.translateX(-20), rexMesh.rotateY(Math.radians(.1)), scene.rotateZ(Math.radians(.1))
 		}
 	}
 	if (Key.isDown(Key.right) || Key.isDown(Key.D)) {
-		if (rexPivot.position.x < 500) {
+		if (rexPivot.position.x < 450) {
 			rexPivot.translateX(20), rexMesh.rotateY(Math.radians(-.1)), scene.rotateZ(Math.radians(-.1))
 		}
 	}
@@ -278,7 +273,6 @@ function cameraSwitch(){
 }
 
 ////ENEMY GENERATION
-
 function createEnemy() {
 	if (enemyPivot.children.length <= 99) {
 
@@ -291,12 +285,16 @@ function createEnemy() {
 
 		var enemyColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
 
-		var enemyGeometry = new THREE.BoxGeometry(Math.floor(Math.random() * 70) + 5, Math.floor(Math.random() * 70) + 5, Math.floor(Math.random() * 75) + 5, 2, 2, 2)
+		var enemyGeometry = new THREE.BoxGeometry(Math.floor(Math.random() * 50) + 50, Math.floor(Math.random() * 50) + 50, Math.floor(Math.random() * 50) + 50, 2, 2, 2)
 		var enemyMaterial = new THREE.MeshBasicMaterial({
 			color: enemyColor,
 			wireframe: true
 		});
+		
 		enemyMesh = new THREE.Mesh(enemyGeometry, enemyMaterial);
+		var enemyBox = new THREE.Box3().setFromObject(enemyMesh);
+		var enemyHalfX = enemyBox.max.x
+		var enemyHalfY = enemyBox.max.y
 
 		enemyId += 1;
 		enemyMesh.name = "enemy" + parseInt(enemyId);
@@ -304,27 +302,92 @@ function createEnemy() {
 		////PHYSI.JS
 		enemyMesh = new Physijs.BoxMesh(enemyGeometry, enemyMaterial);
 
-		var switchNum = Math.floor(Math.random() * 5);
+		var switchNum = Math.floor(Math.random() * 21);
 		switch (switchNum) {
 			case 0:
 				////TOP RIGHT
-				enemyMesh.position.set((Math.floor(Math.random() * 600)), (Math.floor(Math.random() * 400)), newEnemyPosition)
+				enemyMesh.position.set((Math.floor(Math.random() * 500) - enemyHalfX), (Math.floor(Math.random() * 400) - enemyHalfY), newEnemyPosition)
 				break;
 			case 1:
 				////TOP LEFT
-				enemyMesh.position.set((Math.floor(Math.random() * -600)), (Math.floor(Math.random() * 400)), newEnemyPosition)
+				enemyMesh.position.set((Math.floor(Math.random() * -500) + enemyHalfX), (Math.floor(Math.random() * 400) - enemyHalfY ), newEnemyPosition)
 				break;
 			case 2:
 				////BOTTOM LEFT
-				enemyMesh.position.set((Math.floor(Math.random() * -600)), (Math.floor(Math.random() * -400)), newEnemyPosition)
+				enemyMesh.position.set((Math.floor(Math.random() * -500) + enemyHalfX), (Math.floor(Math.random() * -400) + enemyHalfY), newEnemyPosition)
 				break;
 			case 3:
 				////BOTTOM RIGHT
-				enemyMesh.position.set((Math.floor(Math.random() * 600)), (Math.floor(Math.random() * -400)), newEnemyPosition)
+				enemyMesh.position.set((Math.floor(Math.random() * 500) - enemyHalfX), (Math.floor(Math.random() * -400) + enemyHalfY), newEnemyPosition)
 				break;
 			case 4:
 				////CENTER
 				enemyMesh.position.set(0, 0, newEnemyPosition)
+				break;
+			case 5:
+				////TOP CENTER
+				enemyMesh.position.set(0, 400 - enemyHalfY, newEnemyPosition)
+				break;
+			case 6:
+				////BOTTOM CENTER
+				enemyMesh.position.set(0, -400 + enemyHalfY, newEnemyPosition)
+				break;
+			case 7:
+				////LEFT CENTER
+				enemyMesh.position.set(-500 + enemyHalfX, 0, newEnemyPosition)
+				break;
+			case 8:
+				////RIGHT CENTER
+				enemyMesh.position.set(500 - enemyHalfX, 0, newEnemyPosition)
+				break;
+			case 9:
+				////TOP LEFT
+				enemyMesh.position.set(-500 + enemyHalfX, 400 - enemyHalfY, newEnemyPosition)
+				break;
+			case 10:
+				////TOP RIGHT
+				enemyMesh.position.set(500 - enemyHalfX, 400 - enemyHalfY, newEnemyPosition)
+				break;
+			case 11:
+				////BOTTOM LEFT
+				enemyMesh.position.set(-500 + enemyHalfX, -400 + enemyHalfY, newEnemyPosition)
+				break;
+			case 12:
+				////BOTTOM RIGHT
+				enemyMesh.position.set(500 - enemyHalfX, -400 + enemyHalfY, newEnemyPosition)
+				break;
+			case 13:
+				////QUAD 1 BOTTOM LEFT
+				enemyMesh.position.set(0 + enemyHalfX, 0 + enemyHalfY, newEnemyPosition)
+				break;
+			case 14:
+				////QUAD 2 BOTTOM RIGHT
+				enemyMesh.position.set(0 - enemyHalfX, 0 + enemyHalfY, newEnemyPosition)
+				break;
+			case 15:
+				////QUAD 3 TOP RIGHT
+				enemyMesh.position.set(0 - enemyHalfX, 0 - enemyHalfY, newEnemyPosition)
+				break;
+			case 16:
+				////QUAD 4 TOP LEFT
+				enemyMesh.position.set(0 + enemyHalfX, 0 - enemyHalfY, newEnemyPosition)
+				break;
+			case 17:
+				////QUAD 1 CENTER
+				enemyMesh.position.set(250, 200, newEnemyPosition)
+				break;
+			case 18:
+				////QUAD 2 CENTER
+				enemyMesh.position.set(-250, 200, newEnemyPosition)
+				break;
+			case 19:
+				////QUAD 3 CENTER
+				enemyMesh.position.set(-250, -200, newEnemyPosition)
+				break;
+			case 20:
+				////QUAD 4 CENTER
+				enemyMesh.position.set(250, -200, newEnemyPosition)
+				break;
 		}
 		enemyPivot.add(enemyMesh)
 	}
@@ -347,6 +410,67 @@ function checkForCollision() {
 		}
 	}
 }
+////CHECK DIFFICULTY
+function checkDifficulty(time) {
+	////WORLD TRANSLATION && DIFFICULTY    
+	////***** LEVEL 5 *****
+	if(time >= 40.0){
+		difficulty = .99
+		gridLine.translateZ(gridLineSpeed*difficulty)
+		cubeMesh.translateZ(cubeMeshSpeed*difficulty)
+		checkForEnemies(difficulty)
+		console.log("level 5")
+	}
+	////***** LEVEL 4 *****
+	if(time >= 30.0 && time < 40.0){
+		difficulty = .401
+		gridLine.translateZ(gridLineSpeed*difficulty)
+		cubeMesh.translateZ(cubeMeshSpeed*difficulty)
+		checkForEnemies(difficulty)
+		console.log("level 4")
+	}
+	////***** LEVEL 3 *****
+	if(time >= 20.0 && time < 30.0){
+		difficulty = .333
+		gridLine.translateZ(gridLineSpeed*difficulty)
+		cubeMesh.translateZ(cubeMeshSpeed*difficulty)
+		checkForEnemies(difficulty)
+		console.log("level 3")
+	}
+	////***** LEVEL 2 *****
+	if (time >= 10.0 && time < 20.0){
+		difficulty = .255
+		gridLine.translateZ(gridLineSpeed*difficulty);
+		cubeMesh.translateZ(cubeMeshSpeed*difficulty);
+		checkForEnemies(difficulty)
+		console.log("level 2")
+	}
+	////***** LEVEL 1 *****
+	if(time >= 0.0 && time < 10.0){
+		difficulty = .100
+		gridLine.translateZ(gridLineSpeed*difficulty);
+		cubeMesh.translateZ(cubeMeshSpeed*difficulty);
+		checkForEnemies(difficulty)
+		console.log("level 1")
+	}
+}
+
+////CHECK IF ENEMIES EXIST
+function checkForEnemies(){
+	if (typeof enemyMesh != "undefined") {
+		enemyPivot.translateZ(enemyPivotSpeed*difficulty)
+		
+		if (enemyPivot.children[0].matrixWorld.elements[14] > 200 && enemyPivot.children[0].material.opacity > 0) {
+			enemyPivot.children[0].material.opacity -= .1;
+		}
+		if (enemyPivot.children[0].matrixWorld.elements[14] > 1200) {
+			scoreCounter += 1;
+			scoreDisplay.innerHTML = '<h1>SCORE: ' + scoreCounter + '</h1>';
+			deleteEnemy()
+		}
+	}
+}
+
 
 ////WINDOW RESIZE
 function onWindowResize() {
@@ -356,5 +480,3 @@ function onWindowResize() {
 	camera.updateProjectionMatrix();
 	renderer.setSize(displayWidth, displayHeight);
 }
-
-
