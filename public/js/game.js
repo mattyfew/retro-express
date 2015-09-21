@@ -150,12 +150,13 @@ function startGame(){
 		sideCamera.remove();
 		rexMesh.remove();
 		rexPivot.remove();
+		enemyMesh.position.set(0,0,0);
+		enemyPivot.position.set(0,0,1000);
 		enemyMesh.remove()
 		enemyPivot.remove();
 		clearInterval(enemyCreateInterval);
 		scoreDisplay.remove();
 		setGameState("menu")
-//		resPivot.position.set(0,0,0)
 //		for( var i = gameScene.children.length - 1; i >= 0; i--) {
 //			object = gameScene.children[i];
 //			gameScene.remove(object);
@@ -234,9 +235,9 @@ function startGame(){
 		if (typeof enemyMesh != "undefined") {
 			enemyPivot.translateZ(enemyPivotSpeed*difficulty)
 
-			if (enemyPivot.children[0].matrixWorld.elements[14] > 200 && enemyPivot.children[0].material.opacity > 0) {
-				enemyPivot.children[0].material.opacity -= .1;
-			}
+//			if (enemyPivot.children[0].matrixWorld.elements[14] > 200 && enemyPivot.children[0].material.opacity > 0) {
+//				enemyPivot.children[0].material.opacity -= .1;
+//			}
 			if (enemyPivot.children[0].matrixWorld.elements[14] > 1200) {
 				scoreCounter += 1;
 				scoreDisplay.innerHTML = 'SCORE: ' + scoreCounter;
@@ -564,7 +565,7 @@ function startGame(){
 					cancelAnimationFrame(gA);
 					////ORBIT CAMERA (DEATH CAM)
 					var orbitCamera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 2500);
-					orbitCamera.position.set(200, 0, 0);
+					orbitCamera.position.set(300, 300, 100);
 
 					////ORBIT CONTROLS
 					var orbitControls = new THREE.OrbitControls( orbitCamera, renderer.domElement );
@@ -581,7 +582,7 @@ function startGame(){
 
 					///ORBIT CAMERA DEATH
 					rexPivot.add(orbitCamera)
-					orbitCamera.lookAt(rexPivot.position);
+					orbitCamera.lookAt(rexMesh.position);
 
 					var gameOverAnimate = function(){
 						gOA = requestAnimationFrame(gameOverAnimate);
