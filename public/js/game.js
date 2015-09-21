@@ -27,8 +27,10 @@ renderer.setSize(displayWidth, displayHeight);
 display.appendChild(renderer.domElement);
 
 ////WINDOW RESIZE LISTENER
+window.addEventListener('resize', onWindowResize, false);
+
 function onWindowResize() {
-	function callback(){
+	console.log("derp")
 		var displayWidth = parseInt(displayStyle.width);
 		var displayHeight = parseInt(displayStyle.width) / 2;
 		if (typeof orbitCamera != "undefined"){
@@ -45,10 +47,7 @@ function onWindowResize() {
 			startCamera.updateProjectionMatrix();
 		}
 		renderer.setSize(displayWidth, displayHeight);
-	}
-	window.addEventListener('resize', callback(), false);
-}
-
+	}	
 
 ////GEOMETRY
 ////REX (SPACESHIP) - CENTERED ON AXIS
@@ -92,7 +91,7 @@ function startMenu(){
 	startCamera.position.set(0,60,100);
 	startCamera.lookAt(startMenuScene.position);
 	//startMenuScene.add(startCamera)
-	onWindowResize();
+//	onWindowResize();
 	
 	////START SPHERE 
 	var sphereGeometry = new THREE.SphereGeometry(150,50,50);
@@ -431,7 +430,7 @@ function startGame(){
 		//Physijs.scripts.worker = '/physijs/physijs_worker.js';
 		//Physijs.scripts.ammo = '/physijs/examples/js/ammo.js';
 	
-	onWindowResize();
+//	onWindowResize();
 	
 	////DOM SETUP - SCORE COUNTER
 	var scoreCounter = 0;
