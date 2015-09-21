@@ -30,7 +30,6 @@ display.appendChild(renderer.domElement);
 window.addEventListener('resize', onWindowResize, false);
 
 function onWindowResize() {
-	console.log("derp")
 		var displayWidth = parseInt(displayStyle.width);
 		var displayHeight = parseInt(displayStyle.width) / 2;
 		if (typeof orbitCamera != "undefined"){
@@ -90,9 +89,7 @@ function startMenu(){
 	var startCamera = new THREE.PerspectiveCamera(55, displayWidth / displayHeight, 0.1, 500);
 	startCamera.position.set(0,60,100);
 	startCamera.lookAt(startMenuScene.position);
-	//startMenuScene.add(startCamera)
-//	onWindowResize();
-	
+
 	////START SPHERE 
 	var sphereGeometry = new THREE.SphereGeometry(150,50,50);
 	var sphereColor = Math.floor(Math.random() * 16777215).toString(16);
@@ -105,7 +102,7 @@ function startMenu(){
 	startButton.id = "start-button"
 	startButton.innerHTML = 'START GAME';
 	display.appendChild(startButton);
-	startButton.addEventListener('click',function(){setGameState("game"); startMenuScene.remove(); startButton.remove()})
+	startButton.addEventListener('click',function(){setGameState("game"); startMenuScene.remove(); rexPivot.remove(); rexMesh.remove(); cancelAnimationFrame(sMA); startButton.remove()})
 	
 	////DOM SETUP - LOGO
 	var gameLogo = document.createElement('pre');
@@ -119,8 +116,8 @@ function startMenu(){
 	startMenuScene.add(rexPivot);
 	
 	var startMenuAnimate = function(){
-		requestAnimationFrame(startMenuAnimate);
-		rexPivot.rotateY(Math.radians(.9));
+		sMA = requestAnimationFrame(startMenuAnimate);
+		//rexPivot.rotateY(Math.radians(.9));
 		startSphereMesh.rotateY(Math.radians(-.1));
 		renderer.render(startMenuScene, startCamera);
 	};
@@ -476,11 +473,9 @@ function startGame(){
 
 	////ADD REX
 	var rexDirection = "up";
-	rexMesh.rotateX(Math.radians(90));
-	rexPivot.rotateY(Math.radians(0));
+	//rexMesh.rotateX(Math.radians(90));
 	rexPivot.translateZ(100);
-
-//	rexPivot.rotation.y = 0;
+	rexPivot.rotation.y = 0;
 //	rexPivot.translate.z = 100;
 	gameScene.add(rexPivot)
 	rexPivot.add(rexMesh);
