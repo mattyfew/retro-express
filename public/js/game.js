@@ -14,7 +14,7 @@ var Key = {
 	one: 49,two: 50,
 	isDown: function (keyCode) {return this._pressed[keyCode];},
 	onKeydown: function (event) {this._pressed[event.keyCode] = true;},
-	onKeyup: function (event) {if (event.keyCode === 16){rexMesh.rotation.y = 0;}delete this._pressed[event.keyCode];}
+	onKeyup: function (event) {if (event.keyCode === 16){rexMesh.rotation.y = 0;} delete this._pressed[event.keyCode];}
 };
 
 ////DOM SETUP
@@ -48,37 +48,30 @@ function onWindowResize() {
 		renderer.setSize(displayWidth, displayHeight);
 	}	
 
-////GEOMETRY
-////REX (SPACESHIP) - CENTERED ON AXIS
-var rexPivot = new THREE.Object3D();
-var rexShape = new THREE.Shape();
-////REX SVG COORDINATES - CENTERED
-function rexShapeData() {
-	rexShape.moveTo(0, -35);
-	rexShape.lineTo(9.3, -17.7);
-	rexShape.lineTo(50, 21.8);
-	rexShape.lineTo(6.6, 21.8);
-	rexShape.lineTo(0, 35);
-	rexShape.lineTo(-6.6, 21.8);
-	rexShape.lineTo(-50, 21.8);
-	rexShape.lineTo(-9.3, -17.7);
-}
-rexShapeData() //GRABS SVG DATA
-var rexExtrusion = {amount: 4, bevelEnabled: false};
-var rexGeometry = new THREE.ExtrudeGeometry(rexShape, rexExtrusion);
-var rexMaterial = new THREE.MeshBasicMaterial({color: 0x00FF00, wireframe: true});
-var rexMesh = new THREE.Mesh(rexGeometry, rexMaterial);
-//var rexMesh = new Physijs.ConvexMesh(rexGeometry, rexMaterial);
-
-
 /////////////////////////////////////////////////////////////////////////////////////      END GLOBAL
 
 ////GAME STATE
 
-setGameState("menu")
+setGameState("menu");
 
 
 function startMenu(){
+	function killStartMenu(){
+		console.log("Killing Start Menu")
+		cancelAnimationFrame(sMA);
+		for( var i = startMenuScene.children.length - 1; i >= 0; i--) {
+			object = startMenuScene.children[i];
+			startMenuScene.remove(object);
+		}
+		startMenuScene.remove();
+		startCamera.remove();
+		rexMesh.remove();
+		rexPivot.remove();
+		gameLogo.remove();
+		startButton.remove();
+		setGameState("game");
+	}
+	
 	////CREATE SCENE
 	var startMenuScene = new THREE.Scene();
 	
@@ -102,7 +95,7 @@ function startMenu(){
 	startButton.id = "start-button"
 	startButton.innerHTML = 'START GAME';
 	display.appendChild(startButton);
-	startButton.addEventListener('click',function(){setGameState("game"); startMenuScene.remove(); rexPivot.remove(); rexMesh.remove(); cancelAnimationFrame(sMA); startButton.remove()})
+	startButton.addEventListener('click',function(){killStartMenu();})
 	
 	////DOM SETUP - LOGO
 	var gameLogo = document.createElement('pre');
@@ -111,13 +104,34 @@ function startMenu(){
 	display.appendChild(gameLogo);
 	
 	
+	////GEOMETRY
+	////REX (SPACESHIP) - CENTERED ON AXIS
+	var rexPivot = new THREE.Object3D();
+	var rexShape = new THREE.Shape();
+	////REX SVG COORDINATES - CENTERED
+	function rexShapeData() {
+		rexShape.moveTo(0, -35);
+		rexShape.lineTo(9.3, -17.7);
+		rexShape.lineTo(50, 21.8);
+		rexShape.lineTo(6.6, 21.8);
+		rexShape.lineTo(0, 35);
+		rexShape.lineTo(-6.6, 21.8);
+		rexShape.lineTo(-50, 21.8);
+		rexShape.lineTo(-9.3, -17.7);
+	}
+	rexShapeData() //GRABS SVG DATA
+	var rexExtrusion = {amount: 4, bevelEnabled: false};
+	var rexGeometry = new THREE.ExtrudeGeometry(rexShape, rexExtrusion);
+	var rexMaterial = new THREE.MeshBasicMaterial({color: 0x00FF00, wireframe: true});
+	var rexMesh = new THREE.Mesh(rexGeometry, rexMaterial);
+	//var rexMesh = new Physijs.ConvexMesh(rexGeometry, rexMaterial);
 	rexMesh.rotateX(Math.radians(90));
 	rexPivot.add(rexMesh);
 	startMenuScene.add(rexPivot);
 	
 	var startMenuAnimate = function(){
 		sMA = requestAnimationFrame(startMenuAnimate);
-		//rexPivot.rotateY(Math.radians(.9));
+		rexPivot.rotateY(Math.radians(.9));
 		startSphereMesh.rotateY(Math.radians(-.1));
 		renderer.render(startMenuScene, startCamera);
 	};
@@ -126,6 +140,27 @@ function startMenu(){
 
 
 function startGame(){
+	
+	function killGame(){
+		console.log("Killing Game")
+
+		resetButton.remove();
+		gameScene.remove();
+		gameCamera.remove();
+		sideCamera.remove();
+		rexMesh.remove();
+		rexPivot.remove();
+		enemyMesh.remove()
+		enemyPivot.remove();
+		clearInterval(enemyCreateInterval);
+		scoreDisplay.remove();
+		setGameState("menu")
+//		resPivot.position.set(0,0,0)
+//		for( var i = gameScene.children.length - 1; i >= 0; i--) {
+//			object = gameScene.children[i];
+//			gameScene.remove(object);
+//		}
+	}
 	
 	function setRexAlive(boolean){
 		switch (boolean){
@@ -137,28 +172,7 @@ function startGame(){
 				break;
 		}
 	}
-	
-	////CAMERA SWITCHER
-	//var cameraSwitcher = "gameCamera"
-	function cameraSwitch(cameraSwitcher){
-		if (Key.isDown(Key.one)) {
-			cameraSwitcher = "gameCamera"
-		}
-		if (Key.isDown(Key.two)) {
-			cameraSwitcher = "sideCamera"
-		}
-		if (cameraSwitcher === "gameCamera") {
-			renderer.render(gameScene, gameCamera);
-		} else if (cameraSwitcher === "sideCamera") {
-			renderer.render(gameScene, sideCamera);
-		} else if (cameraSwitcher === "orbitCamera"){
-			console.log("ORBI!")
-			renderer.render(gameScene, orbitCamera);
-		} else {
-			console.log("default")
-			renderer.render(gameScene, gameCamera);
-		}
-	}
+		
 	////CHECK DIFFICULTY
 	function checkDifficulty(time) {
 		////WORLD TRANSLATION && DIFFICULTY    
@@ -399,8 +413,6 @@ function startGame(){
 	}
 	/////////////////////////////////////////////////////////////////
 	
-
-	
 	////CREATE SCENE
 	var gameScene = new THREE.Scene();//var gameScene = new Physijs.Scene();////PHYSJS VERSION
 	
@@ -429,14 +441,18 @@ function startGame(){
 		//Physijs.scripts.worker = '/physijs/physijs_worker.js';
 		//Physijs.scripts.ammo = '/physijs/examples/js/ammo.js';
 	
-//	onWindowResize();
-	
 	////DOM SETUP - SCORE COUNTER
 	var scoreCounter = 0;
 	var scoreDisplay = document.createElement('div');
 	scoreDisplay.id = 'score-display'
 	scoreDisplay.innerHTML = 'SCORE: ' + scoreCounter;
 	display.appendChild(scoreDisplay);
+	
+	////DOM SETUP - RESET GAME
+	var resetButton = document.createElement('button');
+	resetButton.id = "reset-button"
+	resetButton.innerHTML = 'RESET GAME';
+
 	
 	////WORLD GEOMETRY
 	////GRID PLANE (BOTTOM)
@@ -474,11 +490,30 @@ function startGame(){
 	var enemyId = 0;
 
 	////ADD REX
+	////REX (SPACESHIP) - CENTERED ON AXIS
+	var rexPivot = new THREE.Object3D();
+	var rexShape = new THREE.Shape();
+	////REX SVG COORDINATES - CENTERED
+	function rexShapeData() {
+		rexShape.moveTo(0, -35);
+		rexShape.lineTo(9.3, -17.7);
+		rexShape.lineTo(50, 21.8);
+		rexShape.lineTo(6.6, 21.8);
+		rexShape.lineTo(0, 35);
+		rexShape.lineTo(-6.6, 21.8);
+		rexShape.lineTo(-50, 21.8);
+		rexShape.lineTo(-9.3, -17.7);
+	}
+	rexShapeData() //GRABS SVG DATA
+	var rexExtrusion = {amount: 4, bevelEnabled: false};
+	var rexGeometry = new THREE.ExtrudeGeometry(rexShape, rexExtrusion);
+	var rexMaterial = new THREE.MeshBasicMaterial({color: 0x00FF00, wireframe: true});
+	var rexMesh = new THREE.Mesh(rexGeometry, rexMaterial);
+	//var rexMesh = new Physijs.ConvexMesh(rexGeometry, rexMaterial);
 	var rexDirection = "up";
-	//rexMesh.rotateX(Math.radians(90));
+	rexMesh.rotateX(Math.radians(90));
 	rexPivot.translateZ(100);
 	rexPivot.rotation.y = 0;
-//	rexPivot.translate.z = 100;
 	gameScene.add(rexPivot)
 	rexPivot.add(rexMesh);
 	
@@ -491,6 +526,7 @@ function startGame(){
 	function aliveGameOver(boolean){
 		switch(boolean){
 			case true:
+				cameraSwitcher = "gameCamera"
 				function gameAnimate(){
 					gA = requestAnimationFrame(gameAnimate);
 					//gameScene.simulate() //start physics
@@ -504,19 +540,28 @@ function startGame(){
 					checkForCollision();
 					shipControls();
 					rexWobble();
-					cameraSwitch();
 
 					////PSYCHEDLEIC MODE	
 					//	cubeMesh.material.color.setHex( "0x" + newColor );
 					//	rexMesh.material.color.setHex( "0x" + newColor );
-
+					
+					if (Key.isDown(Key.one)) {
+						cameraSwitcher = "gameCamera"
+					} else if (Key.isDown(Key.two)) {
+						cameraSwitcher = "sideCamera"
+					}
+					
+					if (cameraSwitcher === "gameCamera") {
+						renderer.render(gameScene, gameCamera);
+					} else if (cameraSwitcher === "sideCamera") {
+						renderer.render(gameScene, sideCamera);
+					}
 				};
 				gameAnimate();
 				break;
 			case false:
 				function gameOver(){
-					cancelAnimationFrame(gA)
-					console.log("yoooooooooo")
+					cancelAnimationFrame(gA);
 					////ORBIT CAMERA (DEATH CAM)
 					var orbitCamera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 2500);
 					orbitCamera.position.set(200, 0, 0);
@@ -530,25 +575,9 @@ function startGame(){
 					orbitControls.maxDistance = 1000;
 					orbitControls.enableZoom = false;
 
-					////DOM SETUP - RESET GAME
-					var resetButton = document.createElement('button');
-					resetButton.id = "reset-button"
-					resetButton.innerHTML = 'RESET GAME';
+					////ADD RESET BUTTON
 					display.appendChild(resetButton);
-
-					resetButton.addEventListener('click',function(){
-						resetButton.remove();
-						setGameState("menu")
-//						display.appendChild(startButton); 
-//						gameScene.remove(enemyPivot); 
-//						function restartGame(){
-//							startMenuScene = null;
-//							gameScene = null;
-//						}
-//						restartGame()
-//						setRexAlive(true)
-					})
-
+					resetButton.addEventListener('click',function(){killGame();})
 
 					///ORBIT CAMERA DEATH
 					rexPivot.add(orbitCamera)
@@ -556,10 +585,10 @@ function startGame(){
 
 					var gameOverAnimate = function(){
 						gOA = requestAnimationFrame(gameOverAnimate);
-						//cameraSwitcher = "orbitCamera";
-						cameraSwitch("orbitCamera");
+						renderer.render(gameScene, orbitCamera);
 					}
-					}
+					gameOverAnimate();
+				}
 				gameOver();
 				break;	
 		}
@@ -574,34 +603,6 @@ function setGameState(gameState){
 			break;
 		case "game":
 			startGame();
-			console.log("derp?")
 			break;
 	}
 }
-
-////////////////////////////////////////////////////////////////////
-
-
-////RENDER
-var render = function () {
-	requestAnimationFrame(render);
-	////GAME STATE SWITCHER
-	////GAME STATE --> MENU
-	if (gameState === "menu"){
-	}	
-	if (gameState === "init") {
-		////END INIT STATE
-	} else if (gameState === "dead") {
-//		gameState = "init"
-		//cancelAnimationFrame(render);
-		//controls.update(); // required if controls.enableDamping = true, or if controls.autoRotate = true
-//		enemyPivot.translateZ(0)
-//		gridLine.translateZ(0);
-//		cubeMesh.translateZ(0);
-//		setTimeout(function () {
-//			gameState = "init", scoreCounter = 0
-//		}, 5000)
-	}
-};
-//render();
-
