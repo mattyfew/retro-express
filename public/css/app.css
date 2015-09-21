@@ -41,12 +41,19 @@ header span {
 	top: 2%;
 	left: 2%;	
 }
-
+#game-logo {
+	position:absolute;
+	text-align: center;
+	width: 100%;
+	font-size: .33em;
+	top: 2%;
+}
 
 #start-button,
 #reset-button{
 	position:absolute;
-	height: 20%;
+	font-size: .5em;
+	min-height: 20%;
 	width: 30%;
 	top: 40%;
 	left: 35%;
