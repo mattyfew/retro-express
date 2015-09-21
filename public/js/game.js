@@ -12,6 +12,7 @@ var Key = {
 	left: 37, up: 38, right: 39, down: 40,
 	A: 65,W: 87,D: 68,S: 83,
 	one: 49,two: 50, three: 51, zero: 48,
+	equal: 187, dash: 189,
 	isDown: function (keyCode) {return this._pressed[keyCode];},
 	onKeydown: function (event) {this._pressed[event.keyCode] = true;},
 //	onKeyup: function (event) {if (event.keyCode === 16){rexMesh.rotation.y = 0;} delete this._pressed[event.keyCode];}
@@ -130,10 +131,19 @@ function startMenu(){
 	rexPivot.add(rexMesh);
 	startMenuScene.add(rexPivot);
 	
+	var secretMode = false;
+	
 	var startMenuAnimate = function(){
 		sMA = requestAnimationFrame(startMenuAnimate);
 		rexPivot.rotateY(Math.radians(.9));
 		startSphereMesh.rotateY(Math.radians(-.1));
+		if (Key.isDown(Key.zero)) {
+			secretMode = true;
+		}
+		if (secretMode === true){
+			var newStartSphereColor = Math.floor(Math.random() * 16777215).toString(16);
+			startSphereMesh.material.color.setHex( "0x" + newStartSphereColor );
+		}
 		var gameLogoColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
 		gameLogo.style.color = gameLogoColor;
 		renderer.render(startMenuScene, startCamera);
@@ -148,6 +158,7 @@ function startGame(){
 		clearInterval(enemyCreateInterval);
 		for( var i = enemyPivot.children.length - 1; i >= 0; i--) {
 			selectedEnemyMesh = enemyPivot.children[i];
+			selectedEnemyMesh.position.set(0,0,0);
 			enemyPivot.remove(selectedEnemyMesh);
 		}
 //		gameScene.dispose();
@@ -172,9 +183,8 @@ function startGame(){
 		cubeMesh.remove();
 		rexMesh.remove();
 		rexPivot.remove();
-		enemyMesh.position.set(0,0,0);
-		enemyPivot.position.set(0,0,0);
-		enemyPivot.position.set(0,0,10000);
+		enemyMesh.position.set(0,0,-5000);
+		enemyPivot.position.set(0,0,-5000);
 		enemyMesh.remove();
 		enemyPivot.remove();
 		scoreDisplay.remove();
@@ -574,9 +584,9 @@ function startGame(){
 					
 					if (godMode === false){
 						checkForCollision();
+						rexMesh.material.color.setHex(0x00FF00);
 					} else if (godMode === true){
 						////PSYCHEDLEIC MODE	
-						cubeMesh.material.color.setHex( "0x" + newColor );
 						rexMesh.material.color.setHex( "0x" + newColor );
 					}
 					
@@ -592,8 +602,10 @@ function startGame(){
 						cameraSwitcher = "sideCamera"
 					} else if (Key.isDown(Key.three)) {
 						cameraSwitcher = "cockpitCamera"
-					} else if (Key.isDown(Key.zero)) {
-						godMode = !godMode;
+					} else if (Key.isDown(Key.equal)) {
+						godMode = true;
+					} else if (Key.isDown(Key.dash)) {
+						godMode = false;
 					}
 					
 					if (cameraSwitcher === "gameCamera") {
