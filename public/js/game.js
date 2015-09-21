@@ -11,11 +11,11 @@ var Key = {
 	shift: 16, 
 	left: 37, up: 38, right: 39, down: 40,
 	A: 65,W: 87,D: 68,S: 83,
-	one: 49,two: 50,
+	one: 49,two: 50, three: 51, zero: 48,
 	isDown: function (keyCode) {return this._pressed[keyCode];},
 	onKeydown: function (event) {this._pressed[event.keyCode] = true;},
 //	onKeyup: function (event) {if (event.keyCode === 16){rexMesh.rotation.y = 0;} delete this._pressed[event.keyCode];}
-	onKeyup: function (event) {delete this._pressed[event.keyCode];}
+	onKeyup: function (event) {delete this._pressed[event.keyCode];}	
 };
 
 ////DOM SETUP
@@ -180,6 +180,7 @@ function startGame(){
 		scoreDisplay.remove();
 		orbitMessage.remove();
 		resetButton.remove();
+		godMode = null;
 		
 
 		setGameState("menu")
@@ -290,8 +291,12 @@ function startGame(){
 		////SHIFT KEY (VERTICAL MODE)
 		if (Key.isDown(Key.shift)){
 			rexMesh.rotation.y = Math.radians(90);
-		}////SHIFT KEYUP IS IN KEY VARIABLE
+			if(cameraSwitcher === "cockpitCamera"){
+				cockpitCamera.rotation.z = Math.radians(90)
+			}
+		}////SHIFT KEYUP RESET IS IN ANIMATE FUNCTION
 	}
+	
 	////ENEMY GENERATION
 	function createEnemy() {
 		if (enemyPivot.children.length <= 99) {
@@ -484,6 +489,7 @@ function startGame(){
 	////GRID PLANE (TOP)
 	var gridLineTop = gridLine.clone();
 	gridLineTop.position.y = 500;
+
 	////CUBE (TUNNEL)
 	var cubeGeometry = new THREE.BoxGeometry(4000, 1100, 300000, 10, 10, 1000);
 	var cubeMaterial = new THREE.MeshBasicMaterial({color: 0x666666, wireframe: true});
@@ -531,9 +537,19 @@ function startGame(){
 	
 	gameScene.add(enemyPivot);
 	
+	//FIRST PERSON CAMERA
+	cockpitCamera = new THREE.PerspectiveCamera(80, displayWidth / displayHeight, 1, 3000);
+	cockpitCamera.rotateY(90)
+	cockpitCamera.lookAt(gameScene.position)
+	cockpitCamera.position.set(0,0,-10)
+	
+	rexPivot.add(cockpitCamera)
+	
 	////CREATE AND DELETE OBSTACLES ON INTERVAL
 	var enemyCreateInterval = setInterval(createEnemy, 10)
 	//var enemyDeleteInterval = setInterval(deleteEnemy, 10)
+	
+	godMode = false;
 	
 	function aliveGameOver(boolean){
 		switch(boolean){
@@ -545,31 +561,49 @@ function startGame(){
 					var delta = gameClock.getDelta()
 					var time = parseInt(gameClock.getElapsedTime());
 					var newColor = Math.floor(Math.random() * 16777215).toString(16);
-
+					
+					////BARREL ROLL RESET
 					rexMesh.rotation.y = 0;
+					if(cameraSwitcher === "cockpitCamera"){
+						cockpitCamera.rotation.z = 0
+					}
+					
 					////WORLD TRANSLATION && DIFFICULTY    
 					checkDifficulty(time) 
 					checkForEnemies()
-					checkForCollision();
+					
+					if (godMode === false){
+						checkForCollision();
+					} else if (godMode === true){
+						////PSYCHEDLEIC MODE	
+						cubeMesh.material.color.setHex( "0x" + newColor );
+						rexMesh.material.color.setHex( "0x" + newColor );
+					}
+					
 					shipControls();
 					rexWobble();
 					
 		
-					////PSYCHEDLEIC MODE	
-					//	cubeMesh.material.color.setHex( "0x" + newColor );
-					//	rexMesh.material.color.setHex( "0x" + newColor );
+	
 					
 					if (Key.isDown(Key.one)) {
 						cameraSwitcher = "gameCamera"
 					} else if (Key.isDown(Key.two)) {
 						cameraSwitcher = "sideCamera"
+					} else if (Key.isDown(Key.three)) {
+						cameraSwitcher = "cockpitCamera"
+					} else if (Key.isDown(Key.zero)) {
+						godMode = !godMode;
 					}
 					
 					if (cameraSwitcher === "gameCamera") {
 						renderer.render(gameScene, gameCamera);
 					} else if (cameraSwitcher === "sideCamera") {
 						renderer.render(gameScene, sideCamera);
+					} else if (cameraSwitcher === "cockpitCamera"){
+						renderer.render(gameScene, cockpitCamera)
 					}
+					
 				};
 				gameAnimate();
 				break;
