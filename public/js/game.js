@@ -139,8 +139,8 @@ function startGame(){
 	}
 	
 	////CAMERA SWITCHER
-	var cameraSwitcher = "gameCamera"
-	function cameraSwitch(){
+	//var cameraSwitcher = "gameCamera"
+	function cameraSwitch(cameraSwitcher){
 		if (Key.isDown(Key.one)) {
 			cameraSwitcher = "gameCamera"
 		}
@@ -152,8 +152,10 @@ function startGame(){
 		} else if (cameraSwitcher === "sideCamera") {
 			renderer.render(gameScene, sideCamera);
 		} else if (cameraSwitcher === "orbitCamera"){
+			console.log("ORBI!")
 			renderer.render(gameScene, orbitCamera);
 		} else {
+			console.log("default")
 			renderer.render(gameScene, gameCamera);
 		}
 	}
@@ -504,7 +506,6 @@ function startGame(){
 					rexWobble();
 					cameraSwitch();
 
-
 					////PSYCHEDLEIC MODE	
 					//	cubeMesh.material.color.setHex( "0x" + newColor );
 					//	rexMesh.material.color.setHex( "0x" + newColor );
@@ -536,16 +537,16 @@ function startGame(){
 					display.appendChild(resetButton);
 
 					resetButton.addEventListener('click',function(){
-						gameState = "menu"; 
-						resetButton.remove(); 
-						display.appendChild(startButton); 
-						gameScene.remove(enemyPivot); 
-						function restartGame(){
-							startMenuScene = null;
-							gameScene = null;
-						}
-						restartGame()
-						setRexAlive(true)
+						resetButton.remove();
+						setGameState("menu")
+//						display.appendChild(startButton); 
+//						gameScene.remove(enemyPivot); 
+//						function restartGame(){
+//							startMenuScene = null;
+//							gameScene = null;
+//						}
+//						restartGame()
+//						setRexAlive(true)
 					})
 
 
@@ -554,8 +555,9 @@ function startGame(){
 					orbitCamera.lookAt(rexPivot.position);
 
 					var gameOverAnimate = function(){
-						requestAnimationFrame(gameOverAnimate);
-						cameraSwitcher = "orbitCamera"
+						gOA = requestAnimationFrame(gameOverAnimate);
+						//cameraSwitcher = "orbitCamera";
+						cameraSwitch("orbitCamera");
 					}
 					}
 				gameOver();
