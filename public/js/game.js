@@ -490,7 +490,7 @@ function startGame(){
 		switch(boolean){
 			case true:
 				function gameAnimate(){
-					requestAnimationFrame(gameAnimate);
+					gA = requestAnimationFrame(gameAnimate);
 					//gameScene.simulate() //start physics
 					var delta = gameClock.getDelta()
 					var time = parseInt(gameClock.getElapsedTime());
@@ -514,6 +514,7 @@ function startGame(){
 				break;
 			case false:
 				function gameOver(){
+					cancelAnimationFrame(gA)
 					console.log("yoooooooooo")
 					////ORBIT CAMERA (DEATH CAM)
 					var orbitCamera = new THREE.PerspectiveCamera(45, displayWidth / displayHeight, 0.1, 2500);
