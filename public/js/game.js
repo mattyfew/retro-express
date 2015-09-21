@@ -14,7 +14,8 @@ var Key = {
 	one: 49,two: 50,
 	isDown: function (keyCode) {return this._pressed[keyCode];},
 	onKeydown: function (event) {this._pressed[event.keyCode] = true;},
-	onKeyup: function (event) {if (event.keyCode === 16){rexMesh.rotation.y = 0;} delete this._pressed[event.keyCode];}
+//	onKeyup: function (event) {if (event.keyCode === 16){rexMesh.rotation.y = 0;} delete this._pressed[event.keyCode];}
+	onKeyup: function (event) {delete this._pressed[event.keyCode];}
 };
 
 ////DOM SETUP
@@ -54,10 +55,8 @@ function onWindowResize() {
 
 setGameState("menu");
 
-
 function startMenu(){
 	function killStartMenu(){
-		console.log("Killing Start Menu")
 		cancelAnimationFrame(sMA);
 		for( var i = startMenuScene.children.length - 1; i >= 0; i--) {
 			object = startMenuScene.children[i];
@@ -68,6 +67,7 @@ function startMenu(){
 		rexMesh.remove();
 		rexPivot.remove();
 		gameLogo.remove();
+		startSphereMesh.remove();
 		startButton.remove();
 		setGameState("game");
 	}
@@ -101,6 +101,7 @@ function startMenu(){
 	var gameLogo = document.createElement('pre');
 	gameLogo.id = "game-logo"
 	gameLogo.innerHTML = '██████╗ ███████╗████████╗██████╗  ██████╗ ███████╗██╗  ██╗██████╗ ██████╗ ███████╗███████╗███████╗\r\n██╔══██╗██╔════╝╚══██╔══╝██╔══██╗██╔═══██╗██╔════╝╚██╗██╔╝██╔══██╗██╔══██╗██╔════╝██╔════╝██╔════╝\r\n██████╔╝█████╗     ██║   ██████╔╝██║   ██║█████╗   ╚███╔╝ ██████╔╝██████╔╝█████╗  ███████╗███████╗\r\n██╔══██╗██╔══╝     ██║   ██╔══██╗██║   ██║██╔══╝   ██╔██╗ ██╔═══╝ ██╔══██╗██╔══╝  ╚════██║╚════██║\r\n██║  ██║███████╗   ██║   ██║  ██║╚██████╔╝███████╗██╔╝ ██╗██║     ██║  ██║███████╗███████║███████║\r\n╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝';
+	var gameLogoStyle = window.getComputedStyle(gameLogo);
 	display.appendChild(gameLogo);
 	
 	
@@ -133,6 +134,8 @@ function startMenu(){
 		sMA = requestAnimationFrame(startMenuAnimate);
 		rexPivot.rotateY(Math.radians(.9));
 		startSphereMesh.rotateY(Math.radians(-.1));
+		var gameLogoColor = "#" + Math.floor(Math.random() * 16777215).toString(16);
+		gameLogo.style.color = gameLogoColor;
 		renderer.render(startMenuScene, startCamera);
 	};
 	startMenuAnimate();
@@ -142,25 +145,44 @@ function startMenu(){
 function startGame(){
 	
 	function killGame(){
-		console.log("Killing Game")
-
-		resetButton.remove();
+		clearInterval(enemyCreateInterval);
+		for( var i = enemyPivot.children.length - 1; i >= 0; i--) {
+			selectedEnemyMesh = enemyPivot.children[i];
+			enemyPivot.remove(selectedEnemyMesh);
+		}
+//		gameScene.dispose();
+//		gameCamera.dispose();
+//		sideCamera.dispose();
+//		gridLine.dispose();
+//		gridLineTop.dispose();
+//		cubeMesh.dispose();
+//		rexMesh.dispose();
+//		rexPivot.dispose();
+//		enemyMesh.dispose();
+//		enemyPivot.dispose();
+//		scoreDisplay.dispose();
+//		orbitMessage.dispose();
+//		resetButton.dispose();
+		
 		gameScene.remove();
 		gameCamera.remove();
 		sideCamera.remove();
+		gridLine.remove();
+		gridLineTop.remove();
+		cubeMesh.remove();
 		rexMesh.remove();
 		rexPivot.remove();
 		enemyMesh.position.set(0,0,0);
-		enemyPivot.position.set(0,0,1000);
-		enemyMesh.remove()
+		enemyPivot.position.set(0,0,0);
+		enemyPivot.position.set(0,0,10000);
+		enemyMesh.remove();
 		enemyPivot.remove();
-		clearInterval(enemyCreateInterval);
 		scoreDisplay.remove();
+		orbitMessage.remove();
+		resetButton.remove();
+		
+
 		setGameState("menu")
-//		for( var i = gameScene.children.length - 1; i >= 0; i--) {
-//			object = gameScene.children[i];
-//			gameScene.remove(object);
-//		}
 	}
 	
 	function setRexAlive(boolean){
@@ -176,57 +198,40 @@ function startGame(){
 		
 	////CHECK DIFFICULTY
 	function checkDifficulty(time) {
-		////WORLD TRANSLATION && DIFFICULTY    
+		////WORLD TRANSLATION && DIFFICULTY 
+		////***** LEVEL 11 *****
+		if(time >= 100.0){difficulty = 2;}
+		////***** LEVEL 10 *****
+		if(time >= 90.0 && time < 100.0){difficulty = 1;}
+		////***** LEVEL 9 *****
+		if(time >= 80.0 && time < 90.0){difficulty = .999;}
+		////***** LEVEL 8 *****
+		if(time >= 70.0 && time < 80.0){difficulty = .888;}
+		////***** LEVEL 7 *****
+		if(time >= 60.0 && time < 70.0){difficulty = .777;}
+		////***** LEVEL 6 *****
+		if(time >= 50.0 && time < 60.0){difficulty = .666;}
 		////***** LEVEL 5 *****
-		if(time >= 40.0){
-			difficulty = .99
-			gridLine.translateZ(gridLineSpeed*difficulty)
-			cubeMesh.translateZ(cubeMeshSpeed*difficulty)
-			checkForEnemies(difficulty)
-			console.log("level 5")
-		}
+		if(time >= 40.0 && time < 50.00 ){difficulty = .555;}
 		////***** LEVEL 4 *****
-		if(time >= 30.0 && time < 40.0){
-			difficulty = .401
-			gridLine.translateZ(gridLineSpeed*difficulty)
-			cubeMesh.translateZ(cubeMeshSpeed*difficulty)
-			checkForEnemies(difficulty)
-			console.log("level 4")
-		}
+		if(time >= 30.0 && time < 40.0){difficulty = .444;}
 		////***** LEVEL 3 *****
-		if(time >= 20.0 && time < 30.0){
-			difficulty = .333
-			gridLine.translateZ(gridLineSpeed*difficulty)
-			cubeMesh.translateZ(cubeMeshSpeed*difficulty)
-			checkForEnemies(difficulty)
-			console.log("level 3")
-		}
+		if(time >= 20.0 && time < 30.0){difficulty = .333;}
 		////***** LEVEL 2 *****
-		if (time >= 10.0 && time < 20.0){
-			difficulty = .255
-			gridLine.translateZ(gridLineSpeed*difficulty);
-			cubeMesh.translateZ(cubeMeshSpeed*difficulty);
-			checkForEnemies(difficulty)
-			console.log("level 2")
-		}
+		if (time >= 10.0 && time < 20.0){difficulty = .222;}
 		////***** LEVEL 1 *****
-		if(time >= 0.0 && time < 10.0){
-			difficulty = .100
-			gridLine.translateZ(gridLineSpeed*difficulty);
-			cubeMesh.translateZ(cubeMeshSpeed*difficulty);
-			checkForEnemies(difficulty)
-			console.log("level 1")
-		}
+		if(time >= 0.0 && time < 10.0){difficulty = .111;}
+		gridLine.translateZ(gridLineSpeed*difficulty)
+		cubeMesh.translateZ(cubeMeshSpeed*difficulty)
+		checkForEnemies(difficulty)
 	}
 	////CHECK FOR COLLISION
 	function checkForCollision() {
 		for (var i = 0; i < enemyPivot.children.length; i++) {
-			var rexPosition = new THREE.Box3().setFromObject(rexMesh)
-			var enemyPosition = new THREE.Box3().setFromObject(enemyPivot.children[i])
-
+			var rexPosition = new THREE.Box3().setFromObject(rexMesh);
+			var enemyPosition = new THREE.Box3().setFromObject(enemyPivot.children[i]);
 			if (enemyPosition.isIntersectionBox(rexPosition)) {
 				setRexAlive(false)
-				console.log("You were hit.");
 			}
 		}
 	}
@@ -295,7 +300,7 @@ function startGame(){
 				var lastEnemyPosition = enemyMesh.position.z;
 				var newEnemyPosition = lastEnemyPosition - 200;
 			} else {
-				var newEnemyPosition = -1000;
+				var newEnemyPosition = -5000;
 			}
 
 			var enemyColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
@@ -453,6 +458,10 @@ function startGame(){
 	var resetButton = document.createElement('button');
 	resetButton.id = "reset-button"
 	resetButton.innerHTML = 'RESET GAME';
+	
+	var orbitMessage = document.createElement('div');
+	orbitMessage.id = "orbit-message";
+	orbitMessage.innerHTML = "<p>Click and drag your mouse to rotate the camera!  You can zoom too!</p>"
 
 	
 	////WORLD GEOMETRY
@@ -460,7 +469,8 @@ function startGame(){
 	var gridSize = 300000;
 	var gridStep = 100;
 	var gridGeometry = new THREE.Geometry();
-	var gridMaterial = new THREE.LineBasicMaterial({color: 0x0000FF});
+	var gridColor = '#' + Math.floor(Math.random() * 16777215).toString(16);
+	var gridMaterial = new THREE.LineBasicMaterial({color: gridColor});
 	for (var i = -gridSize; i <= gridSize; i += gridStep) {
 		gridGeometry.vertices.push(new THREE.Vector3(-gridSize, -0.04, i));
 		gridGeometry.vertices.push(new THREE.Vector3(gridSize, -0.04, i));
@@ -470,6 +480,7 @@ function startGame(){
 	var gridLine = new THREE.Line(gridGeometry, gridMaterial, THREE.LinePieces);
 	var gridLineSpeed = 32;
 	gridLine.position.y = -500;
+	gridLine.position.z = 150000;
 	////GRID PLANE (TOP)
 	var gridLineTop = gridLine.clone();
 	gridLineTop.position.y = 500;
@@ -509,7 +520,7 @@ function startGame(){
 	var rexExtrusion = {amount: 4, bevelEnabled: false};
 	var rexGeometry = new THREE.ExtrudeGeometry(rexShape, rexExtrusion);
 	var rexMaterial = new THREE.MeshBasicMaterial({color: 0x00FF00, wireframe: true});
-	var rexMesh = new THREE.Mesh(rexGeometry, rexMaterial);
+	rexMesh = new THREE.Mesh(rexGeometry, rexMaterial);
 	//var rexMesh = new Physijs.ConvexMesh(rexGeometry, rexMaterial);
 	var rexDirection = "up";
 	rexMesh.rotateX(Math.radians(90));
@@ -535,13 +546,15 @@ function startGame(){
 					var time = parseInt(gameClock.getElapsedTime());
 					var newColor = Math.floor(Math.random() * 16777215).toString(16);
 
+					rexMesh.rotation.y = 0;
 					////WORLD TRANSLATION && DIFFICULTY    
 					checkDifficulty(time) 
 					checkForEnemies()
 					checkForCollision();
 					shipControls();
 					rexWobble();
-
+					
+		
 					////PSYCHEDLEIC MODE	
 					//	cubeMesh.material.color.setHex( "0x" + newColor );
 					//	rexMesh.material.color.setHex( "0x" + newColor );
@@ -576,7 +589,8 @@ function startGame(){
 					orbitControls.maxDistance = 1000;
 					orbitControls.enableZoom = false;
 
-					////ADD RESET BUTTON
+					////ADD RESET BUTTON & ORBIT MESSAGE
+					display.appendChild(orbitMessage);
 					display.appendChild(resetButton);
 					resetButton.addEventListener('click',function(){killGame();})
 

@@ -4,14 +4,23 @@
 	<meta charset="UTF-8">
 	<title>Retro Express</title>
 	<link rel="shortcut icon" href="img/ship-icon.png" type="icon/png">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<link rel="stylesheet" href="css/normalize.css">
 	<link rel="stylesheet" href="css/app.css">
+		<!--[if gte IE 9]>
+			<style type="text/css">
+				.gradient {
+				filter: none;
+				}
+			</style>
+	<![endif]-->
 </head>
 <body>
 	<header>
 		<div id="header-content">
 			<h1>
 				<span>Retro Express</span>
+<!--
 				<pre>
 			
 ██████╗ ███████╗████████╗██████╗  ██████╗ ███████╗██╗  ██╗██████╗ ██████╗ ███████╗███████╗███████╗
@@ -22,6 +31,7 @@
 ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝  ╚═╝╚══════╝╚══════╝╚══════╝
 		
 				</pre>
+-->
 			</h1>
 		</div>
 	</header>
@@ -29,7 +39,11 @@
 		<div id="game-display">
 		</div>
 		<div id="game-info">
-			<h2>Info about the game!</h2>
+			<h2>CONTROLS</h2>
+			<div id="controls-list">
+				<p>(W/A/S/D) & (&larr;/&rarr;/&uarr;/&darr;) <span>Navigate Rex</span></p>
+				<p>(Shift) <span>Rotate 90&#176;</span></p>
+			</div>
 		</div>
 	</section>
 <!--	<script src="js/jquery-1.11.3.js"></script>-->
